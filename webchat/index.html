@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+<meta name="description" content="Private AI chat powered by an on-device LLM. No server needed.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://esm.sh; connect-src 'self' https://huggingface.co https://*.huggingface.co https://*.hf.co https://cdn.jsdelivr.net https://esm.sh https://raw.githubusercontent.com https://objects.githubusercontent.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; worker-src 'self' blob: https://cdn.jsdelivr.net">
+<meta property="og:title" content="Öppen AI Chat">
+<meta property="og:description" content="Private AI chat, runs on your device">
+<meta property="og:image" content="/og-preview.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chat.oppen.ai">
+<title>Öppen AI</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<style>
+  body { margin: 0; background: #000000; color: #ebebeb; font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", system-ui, sans-serif; }
+  .splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 999; background: #000000; animation: splashFade 0.4s ease 0.8s forwards; }
+  .splash-logo { font-size: 48px; font-weight: 800; color: #fff; animation: splashPulse 1.5s ease infinite; }
+  .splash-text { font-size: 14px; color: #888; }
+  @keyframes splashPulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+  @keyframes splashFade { to { opacity: 0; pointer-events: none; } }
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+  <div class="splash-logo">Ö</div>
+  <div class="splash-text">Loading...</div>
+</div>
+<div id="app"></div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>

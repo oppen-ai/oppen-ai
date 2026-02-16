@@ -1,0 +1,26 @@
+# Environment
+.env
+
+# Temporary
+.temp
+
+# Build output
+webchat/dist/
+webchat/node_modules/
+webchat/infra/artifacts/
+website/node_modules/
+website/infra/artifacts/
+
+# Test output
+webchat/test-results/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Claude Code
+.claude/
+
+# OS
+.DS_Store

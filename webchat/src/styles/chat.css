@@ -1,0 +1,481 @@
+#messages {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch;
+}
+
+.messages-inner {
+	max-width: 960px;
+	margin: 0 auto;
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 16px 16px;
+}
+
+@media (min-width: 768px) {
+	.messages-inner {
+		padding: 16px 24px;
+	}
+}
+
+@media (min-width: 1024px) {
+	.messages-inner {
+		padding: 16px 32px;
+	}
+}
+
+/* --- Empty state --- */
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	flex: 1;
+	gap: 16px;
+	text-align: center;
+	padding: 40px 16px;
+	min-height: 60vh;
+	animation: fadeIn 0.5s ease;
+}
+
+.empty-logo {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	background: var(--secondary);
+	color: var(--text);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 8px;
+	position: relative;
+	overflow: hidden;
+}
+
+.logo-char {
+	font-size: 48px;
+	font-weight: 800;
+	display: inline-block;
+	line-height: 1;
+	position: relative;
+	top: 4px;
+	transition: transform 0.15s ease-out;
+}
+
+.logo-eyes {
+	position: absolute;
+	top: 16px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 12px;
+	pointer-events: none;
+	transition: transform 0.1s ease-out;
+}
+
+.logo-eye {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--text);
+	transition: transform 0.1s ease-out, opacity 0.1s ease;
+}
+
+/* --- Logo tap animations --- */
+.logo-squeeze {
+	animation: logoSqueeze 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.logo-jump {
+	animation: logoJump 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.logo-kiss {
+	animation: logoKiss 700ms ease forwards;
+}
+
+.logo-shake {
+	animation: logoShake 400ms ease forwards;
+}
+
+.logo-nod {
+	animation: logoNod 400ms ease forwards;
+}
+
+.logo-crazy-eyes {
+	animation: logoCrazyEyes 800ms ease forwards;
+}
+
+.logo-bonk {
+	animation: logoBonk 600ms ease forwards;
+}
+
+/* Per-eye animations for crazy-eyes: opposite circular orbits */
+.logo-eye-cw {
+	animation: eyeOrbitCW 800ms ease forwards;
+}
+
+.logo-eye-ccw {
+	animation: eyeOrbitCCW 800ms ease forwards;
+}
+
+/* Per-eye animations for bonk: collide and bounce */
+.logo-eye-bonk-l {
+	animation: eyeBonkLeft 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.logo-eye-bonk-r {
+	animation: eyeBonkRight 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes logoSqueeze {
+	0% { transform: scaleX(1) scaleY(1); }
+	30% { transform: scaleX(1.3) scaleY(0.7); }
+	60% { transform: scaleX(0.9) scaleY(1.1); }
+	100% { transform: scaleX(1) scaleY(1); }
+}
+
+@keyframes logoJump {
+	0% { transform: translateY(0) scaleX(1) scaleY(1); }
+	35% { transform: translateY(-20px) scaleX(0.9) scaleY(1.1); }
+	65% { transform: translateY(0) scaleX(1.2) scaleY(0.8); }
+	100% { transform: translateY(0) scaleX(1) scaleY(1); }
+}
+
+@keyframes logoKiss {
+	0% { transform: scale(1); }
+	40% { transform: scale(0.85); }
+	100% { transform: scale(1); }
+}
+
+@keyframes logoShake {
+	0% { transform: translateX(0) scale(1); }
+	10% { transform: translateX(-6px) scale(1.15); }
+	23% { transform: translateX(6px) scale(1.2); }
+	36% { transform: translateX(-6px) scale(1.2); }
+	49% { transform: translateX(6px) scale(1.2); }
+	62% { transform: translateX(-6px) scale(1.2); }
+	75% { transform: translateX(6px) scale(1.15); }
+	100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes logoNod {
+	0% { transform: translateY(0) scale(1); }
+	10% { transform: translateY(-5px) scale(0.85); }
+	23% { transform: translateY(3px) scale(0.75); }
+	36% { transform: translateY(-5px) scale(0.7); }
+	49% { transform: translateY(3px) scale(0.7); }
+	62% { transform: translateY(-5px) scale(0.7); }
+	75% { transform: translateY(3px) scale(0.75); }
+	100% { transform: translateY(0) scale(1); }
+}
+
+/* Crazy eyes: O grows bigger while eyes orbit */
+@keyframes logoCrazyEyes {
+	0% { transform: scale(1); }
+	25% { transform: scale(1.2); }
+	50% { transform: scale(1.25); }
+	75% { transform: scale(1.2); }
+	100% { transform: scale(1); }
+}
+
+/* Left eye orbits clockwise, 2 full rotations */
+@keyframes eyeOrbitCW {
+	0% { transform: translate(0, 0); }
+	12.5% { transform: translate(4px, -4px); }
+	25% { transform: translate(8px, 0); }
+	37.5% { transform: translate(4px, 4px); }
+	50% { transform: translate(0, 0); }
+	62.5% { transform: translate(4px, -4px); }
+	75% { transform: translate(8px, 0); }
+	87.5% { transform: translate(4px, 4px); }
+	100% { transform: translate(0, 0); }
+}
+
+/* Right eye orbits counter-clockwise */
+@keyframes eyeOrbitCCW {
+	0% { transform: translate(0, 0); }
+	12.5% { transform: translate(-4px, -4px); }
+	25% { transform: translate(-8px, 0); }
+	37.5% { transform: translate(-4px, 4px); }
+	50% { transform: translate(0, 0); }
+	62.5% { transform: translate(-4px, -4px); }
+	75% { transform: translate(-8px, 0); }
+	87.5% { transform: translate(-4px, 4px); }
+	100% { transform: translate(0, 0); }
+}
+
+/* Bonk: O zooms slightly */
+@keyframes logoBonk {
+	0% { transform: scale(1); }
+	35% { transform: scale(1.1); }
+	50% { transform: scale(1.12); }
+	100% { transform: scale(1); }
+}
+
+/* Left eye slides right, collides at center, bounces back */
+@keyframes eyeBonkLeft {
+	0% { transform: translateX(0); }
+	35% { transform: translateX(4px); }
+	45% { transform: translateX(-3px); }
+	60% { transform: translateX(1px); }
+	100% { transform: translateX(0); }
+}
+
+/* Right eye slides left, collides at center, bounces back */
+@keyframes eyeBonkRight {
+	0% { transform: translateX(0); }
+	35% { transform: translateX(-4px); }
+	45% { transform: translateX(3px); }
+	60% { transform: translateX(-1px); }
+	100% { transform: translateX(0); }
+}
+
+.empty-state h2 {
+	font-size: 28px;
+	font-weight: 400;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+	.empty-state h2 {
+		font-size: 36px;
+	}
+}
+
+.empty-state p {
+	color: var(--text-secondary);
+	font-size: 14px;
+	max-width: 400px;
+	line-height: 1.6;
+}
+
+.empty-chips {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-top: 16px;
+	width: 100%;
+	max-width: 560px;
+}
+
+@media (max-width: 480px) {
+	.empty-chips {
+		grid-template-columns: 1fr;
+	}
+}
+
+.empty-chip {
+	padding: 12px 16px;
+	border-radius: var(--radius-xl);
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+	border: 1px solid var(--border);
+	background: transparent;
+	color: var(--text-secondary);
+	text-align: left;
+	transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.empty-chip:hover {
+	background: var(--surface-hover);
+	border-color: var(--border-strong);
+	color: var(--text);
+}
+
+/* --- Messages --- */
+.message {
+	display: flex;
+	width: 100%;
+	animation: msgIn 0.3s ease-out;
+}
+
+.message.user {
+	justify-content: flex-end;
+}
+
+.message.assistant {
+	justify-content: flex-start;
+}
+
+.msg-body {
+	display: flex;
+	flex-direction: column;
+	max-width: 85%;
+}
+
+.message.user .msg-body {
+	align-items: flex-end;
+}
+
+.message.assistant .msg-body {
+	align-items: flex-start;
+}
+
+.msg-content {
+	padding: 10px 16px;
+	font-size: 14px;
+	line-height: 1.7;
+	word-break: break-word;
+	border-radius: var(--radius-2xl);
+}
+
+.message.user .msg-content {
+	background: var(--msg-user-bg);
+	color: var(--msg-user-text);
+}
+
+.message.assistant .msg-content {
+	background: var(--msg-assistant-bg);
+	color: var(--text);
+	border: 1px solid var(--msg-assistant-border);
+}
+
+.msg-content p {
+	margin-bottom: 8px;
+}
+
+.msg-content p:last-child {
+	margin-bottom: 0;
+}
+
+.msg-content code {
+	font-family: var(--font-mono);
+	font-size: 12.5px;
+	background: var(--code-bg);
+	padding: 2px 6px;
+	border-radius: 4px;
+}
+
+.message.user .msg-content code {
+	background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .message.user .msg-content code {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.msg-content pre {
+	background: var(--code-bg);
+	padding: 12px 16px;
+	border-radius: var(--radius);
+	overflow-x: auto;
+	margin: 8px 0;
+}
+
+.message.user .msg-content pre {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .message.user .msg-content pre {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.msg-content pre code {
+	background: none;
+	padding: 0;
+}
+
+.msg-content strong {
+	font-weight: 600;
+}
+
+.msg-content ul,
+.msg-content ol {
+	padding-left: 20px;
+	margin: 8px 0;
+}
+
+.msg-content li {
+	margin-bottom: 4px;
+}
+
+.msg-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 4px;
+	padding: 0 4px;
+}
+
+.msg-time {
+	font-size: 11px;
+	color: var(--text-tertiary);
+}
+
+/* --- Copy button on messages --- */
+.msg-copy-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border: none;
+	background: none;
+	color: var(--text-tertiary);
+	cursor: pointer;
+	border-radius: 4px;
+	padding: 0;
+	opacity: 0;
+	transition: opacity var(--transition), color var(--transition), background var(--transition);
+}
+
+.message:hover .msg-copy-btn,
+.msg-copy-btn:focus-visible {
+	opacity: 1;
+}
+
+.msg-copy-btn:hover {
+	color: var(--text);
+	background: var(--surface-hover);
+}
+
+@media (max-width: 768px) {
+	.msg-copy-btn {
+		opacity: 0.5;
+	}
+}
+
+/* --- Typing indicator --- */
+.typing-indicator {
+	display: flex;
+	gap: 4px;
+	padding: 4px 0;
+}
+
+.typing-indicator span {
+	width: 6px;
+	height: 6px;
+	background: var(--text-tertiary);
+	border-radius: 50%;
+	animation: typingBounce 1.4s infinite;
+}
+
+.typing-indicator span:nth-child(2) {
+	animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+	animation-delay: 0.4s;
+}
+
+@keyframes msgIn {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes typingBounce {
+	0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+	30% { transform: translateY(-6px); opacity: 1; }
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}

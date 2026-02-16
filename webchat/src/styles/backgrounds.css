@@ -1,0 +1,223 @@
+/* ============================================================
+   Animated Background Themes
+   Premium metallic light reflections on dark backgrounds.
+   Each theme uses [data-bg="name"] on <html> and animates
+   #bg-animated::before / ::after with GPU-composited transforms.
+   ============================================================ */
+
+#bg-animated {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+#bg-animated::before,
+#bg-animated::after {
+	content: "";
+	position: absolute;
+	border-radius: 50%;
+	will-change: transform;
+	opacity: 0;
+}
+
+/* ---- Obsidian — metallic silver ---- */
+[data-bg="obsidian"] #bg-animated::before {
+	width: 180%;
+	height: 160%;
+	top: -40%;
+	left: -50%;
+	background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.7), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.15;
+	animation: bg-obsidian-a 30s ease-in-out infinite alternate;
+}
+
+[data-bg="obsidian"] #bg-animated::after {
+	width: 150%;
+	height: 180%;
+	bottom: -50%;
+	right: -40%;
+	background: radial-gradient(ellipse at center, rgba(200, 200, 220, 0.6), transparent 70%);
+	filter: blur(120px);
+	opacity: 0.12;
+	animation: bg-obsidian-b 36s ease-in-out infinite alternate;
+}
+
+@keyframes bg-obsidian-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(15%, 10%) rotate(25deg); }
+}
+@keyframes bg-obsidian-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-12%, -8%) rotate(-20deg); }
+}
+
+/* ---- Spark — neon green ---- */
+[data-bg="spark"] #bg-animated::before {
+	width: 170%;
+	height: 150%;
+	top: -30%;
+	left: -40%;
+	background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.8), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.15;
+	animation: bg-spark-a 28s ease-in-out infinite alternate;
+}
+
+[data-bg="spark"] #bg-animated::after {
+	width: 160%;
+	height: 170%;
+	bottom: -40%;
+	right: -50%;
+	background: radial-gradient(ellipse at center, rgba(34, 197, 94, 0.6), transparent 70%);
+	filter: blur(110px);
+	opacity: 0.10;
+	animation: bg-spark-b 34s ease-in-out infinite alternate;
+}
+
+@keyframes bg-spark-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(12%, 15%) rotate(20deg); }
+}
+@keyframes bg-spark-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-10%, -12%) rotate(-25deg); }
+}
+
+/* ---- Flux — purple/magenta gradient ---- */
+[data-bg="flux"] #bg-animated::before {
+	width: 180%;
+	height: 160%;
+	top: -35%;
+	left: -45%;
+	background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.8), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.15;
+	animation: bg-flux-a 32s ease-in-out infinite alternate;
+}
+
+[data-bg="flux"] #bg-animated::after {
+	width: 160%;
+	height: 180%;
+	bottom: -45%;
+	right: -35%;
+	background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.7), transparent 70%);
+	filter: blur(110px);
+	opacity: 0.12;
+	animation: bg-flux-b 26s ease-in-out infinite alternate;
+}
+
+@keyframes bg-flux-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(10%, 12%) rotate(30deg); }
+}
+@keyframes bg-flux-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-15%, -10%) rotate(-18deg); }
+}
+
+/* ---- Pulse — ocean blue ---- */
+[data-bg="pulse"] #bg-animated::before {
+	width: 200%;
+	height: 120%;
+	top: -10%;
+	left: -50%;
+	background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.8), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.15;
+	animation: bg-pulse-a 24s ease-in-out infinite alternate;
+}
+
+[data-bg="pulse"] #bg-animated::after {
+	width: 180%;
+	height: 140%;
+	bottom: -30%;
+	right: -40%;
+	background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.6), transparent 70%);
+	filter: blur(120px);
+	opacity: 0.10;
+	animation: bg-pulse-b 32s ease-in-out infinite alternate;
+}
+
+@keyframes bg-pulse-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(8%, 5%) rotate(15deg); }
+}
+@keyframes bg-pulse-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-10%, -8%) rotate(-22deg); }
+}
+
+/* ---- Drift — teal + magenta aurora ---- */
+[data-bg="drift"] #bg-animated::before {
+	width: 180%;
+	height: 170%;
+	top: -40%;
+	left: -40%;
+	background: radial-gradient(ellipse at center, rgba(20, 184, 166, 0.8), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.15;
+	animation: bg-drift-a 36s ease-in-out infinite alternate;
+}
+
+[data-bg="drift"] #bg-animated::after {
+	width: 170%;
+	height: 180%;
+	bottom: -50%;
+	right: -40%;
+	background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.7), transparent 70%);
+	filter: blur(110px);
+	opacity: 0.12;
+	animation: bg-drift-b 28s ease-in-out infinite alternate;
+}
+
+@keyframes bg-drift-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(12%, 8%) rotate(22deg); }
+}
+@keyframes bg-drift-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-8%, -15%) rotate(-28deg); }
+}
+
+/* ---- Nova — pink + blue nebula ---- */
+[data-bg="nova"] #bg-animated::before {
+	width: 190%;
+	height: 160%;
+	top: -35%;
+	left: -50%;
+	background: radial-gradient(ellipse at center, rgba(236, 72, 153, 0.8), transparent 70%);
+	filter: blur(110px);
+	opacity: 0.15;
+	animation: bg-nova-a 34s ease-in-out infinite alternate;
+}
+
+[data-bg="nova"] #bg-animated::after {
+	width: 170%;
+	height: 190%;
+	bottom: -50%;
+	right: -35%;
+	background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.7), transparent 70%);
+	filter: blur(100px);
+	opacity: 0.12;
+	animation: bg-nova-b 26s ease-in-out infinite alternate;
+}
+
+@keyframes bg-nova-a {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(10%, 12%) rotate(28deg); }
+}
+@keyframes bg-nova-b {
+	0% { transform: translate(0, 0) rotate(0deg); }
+	100% { transform: translate(-12%, -10%) rotate(-20deg); }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+	#bg-animated::before,
+	#bg-animated::after {
+		animation: none !important;
+	}
+}

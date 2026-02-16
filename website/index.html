@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Öppen AI - Truly Open, Private AI Chat Running On Your Device</title>
+<meta name="description" content="Truly open AI that runs locally on your device. Private on-device LLM chat - no servers, no cloud, no accounts. Open source AI agent that never sends your data anywhere. Try the demo in your browser.">
+<meta name="keywords" content="truly open ai, private ai, on-device ai, local llm, local ai, oppen, private agent, local agent, open source ai, offline ai, private llm, on-device llm, local ai chat, run ai locally">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Öppen AI - Truly Open, Private AI On Your Device">
+<meta property="og:description" content="Truly open AI that runs locally on your device. No servers, no data collection. Open source private AI agent - your data never leaves.">
+<meta property="og:image" content="https://oppen.ai/og-image.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oppen.ai">
+<meta property="og:site_name" content="Öppen AI">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Öppen AI - Truly Open, Private AI On Your Device">
+<meta name="twitter:description" content="Truly open AI that runs locally on your device. No servers, no data collection. Open source and completely private.">
+<meta name="twitter:image" content="https://oppen.ai/og-image.png">
+<link rel="canonical" href="https://oppen.ai">
+<meta name="theme-color" content="#0a0a12">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+/* ── Reset & Base ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  background:#0a0a12;
+  color:#e2e2f0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+
+/* ── Neon Colors ── */
+:root{
+  --neon-blue:#3b82f6;
+  --neon-purple:#8b5cf6;
+  --neon-pink:#d946ef;
+  --neon-cyan:#22d3ee;
+  --glow-blue:0 0 40px rgba(59,130,246,.3),0 0 80px rgba(59,130,246,.15);
+  --glow-purple:0 0 40px rgba(139,92,246,.3),0 0 80px rgba(139,92,246,.15);
+  --grad-neon:linear-gradient(135deg,var(--neon-blue),var(--neon-purple),var(--neon-pink));
+  --grad-subtle:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.08),rgba(217,70,239,.05));
+}
+
+/* ── Animated Background ── */
+.bg-glow{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+}
+.bg-glow::before,.bg-glow::after{
+  content:'';position:absolute;border-radius:50%;filter:blur(120px);opacity:.4;
+  animation:floatOrb 20s ease-in-out infinite alternate;
+}
+.bg-glow::before{
+  width:600px;height:600px;top:-200px;left:-100px;
+  background:radial-gradient(circle,rgba(59,130,246,.4),transparent 70%);
+}
+.bg-glow::after{
+  width:500px;height:500px;bottom:-150px;right:-100px;
+  background:radial-gradient(circle,rgba(139,92,246,.35),transparent 70%);
+  animation-delay:-10s;animation-direction:alternate-reverse;
+}
+@keyframes floatOrb{
+  0%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(60px,40px) scale(1.1)}
+  66%{transform:translate(-40px,80px) scale(.95)}
+  100%{transform:translate(30px,-30px) scale(1.05)}
+}
+
+/* ── Particles ── */
+.particles{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.particle{
+  position:absolute;border-radius:50%;
+  animation:particleFade linear infinite,particleDrift linear infinite;
+}
+@keyframes particleFade{
+  0%,100%{opacity:.4}
+  50%{opacity:.9}
+}
+@keyframes particleDrift{
+  0%{transform:translateY(0)}
+  100%{transform:translateY(-50vh)}
+}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,10,18,.8);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.nav-logo{
+  font-size:20px;font-weight:800;
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.nav-links{display:flex;gap:32px;font-size:14px;color:rgba(226,226,240,.6)}
+.nav-links a:hover{color:#fff}
+.nav-cta{
+  padding:8px 20px;border-radius:8px;font-size:14px;font-weight:600;
+  background:var(--grad-neon);color:#fff;
+  transition:all .3s ease;border:none;cursor:pointer;
+}
+.nav-cta:hover{box-shadow:var(--glow-purple);transform:translateY(-1px)}
+
+/* ── Sections ── */
+section{padding:120px 32px;max-width:1200px;margin:0 auto}
+.section-label{
+  font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:16px;
+}
+
+/* ── Hero ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding-top:100px;position:relative;
+}
+.hero h1{
+  font-size:clamp(40px,7vw,80px);font-weight:800;line-height:1.1;
+  letter-spacing:-.03em;margin-bottom:24px;
+  max-width:800px;
+}
+.hero h1 .grad{
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(14px,2vw,16px);color:rgba(226,226,240,.6);
+  max-width:560px;margin-bottom:48px;line-height:1.6;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:5px;
+}
+.hero-sub .tag{
+  padding:4px 10px;border-radius:100px;font-size:13px;
+  border:1px solid rgba(139,92,246,.25);
+  background:rgba(139,92,246,.06);
+  white-space:nowrap;letter-spacing:.02em;
+}
+.hero-sub .tag.highlight{
+  border-color:rgba(139,92,246,.5);
+  background:rgba(139,92,246,.12);
+  color:rgba(226,226,240,.9);
+  font-weight:600;
+}
+
+/* ── Animated O Logo (25% bigger: 175px) ── */
+.hero-logo{
+  position:relative;width:140px;height:140px;margin-bottom:48px;cursor:pointer;
+}
+.hero-logo .o-ring{
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%, rgba(139,92,246,.15), rgba(59,130,246,.08) 60%, transparent 100%), #0a0a12;
+  border:2px solid rgba(139,92,246,.2);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow:0 0 60px rgba(139,92,246,.15),0 0 120px rgba(59,130,246,.08);
+  animation:ringPulse 4s ease-in-out infinite;
+}
+@keyframes ringPulse{
+  0%,100%{box-shadow:0 0 60px rgba(139,92,246,.15),0 0 120px rgba(59,130,246,.08)}
+  50%{box-shadow:0 0 80px rgba(139,92,246,.25),0 0 160px rgba(59,130,246,.12)}
+}
+.hero-logo .o-char{
+  font-size:108px;font-weight:800;
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;
+  animation:charFloat 6s ease-in-out infinite;
+}
+@keyframes charFloat{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+}
+.hero-logo .o-eyes{
+  position:absolute;top:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:14px;
+}
+.hero-logo .o-eye{
+  width:14px;height:14px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  clip-path:inset(50% 0 0 0);
+  background:var(--neon-purple);
+  box-shadow:0 0 16px var(--neon-purple),0 0 32px rgba(139,92,246,.3);
+  animation:blink 4s ease-in-out infinite;
+}
+.hero-logo .o-eye:nth-child(2){animation-delay:.1s}
+@keyframes blink{0%,42%,46%,100%{transform:scaleY(1)}44%{transform:scaleY(.1)}}
+
+/* Logo tap animations - matching the chat app */
+.hero-logo.logo-squeeze .o-ring{animation:logoSqueeze 500ms cubic-bezier(.34,1.56,.64,1) forwards}
+.hero-logo.logo-jump .o-ring{animation:logoJump 600ms cubic-bezier(.34,1.56,.64,1) forwards}
+.hero-logo.logo-kiss .o-ring{animation:logoKiss 700ms ease forwards}
+.hero-logo.logo-shake .o-ring{animation:logoShake 400ms ease forwards}
+.hero-logo.logo-nod .o-ring{animation:logoNod 400ms ease forwards}
+.hero-logo.logo-crazy-eyes .o-ring{animation:logoCrazyEyes 800ms ease forwards}
+.hero-logo.logo-bonk .o-ring{animation:logoBonk 600ms ease forwards}
+.hero-logo.logo-shrink .o-char{animation:charFloat 6s ease-in-out infinite, logoShrink 600ms cubic-bezier(.34,1.56,.64,1) forwards}
+.hero-logo.logo-shrink .o-eyes{animation:eyesSpread 600ms cubic-bezier(.34,1.56,.64,1) forwards}
+.hero-logo.logo-grow .o-char{animation:charFloat 6s ease-in-out infinite, logoGrow 700ms cubic-bezier(.34,1.56,.64,1) forwards}
+.hero-logo.logo-grow .o-eyes{animation:eyesPinch 700ms cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* Per-eye animations */
+.o-eye.logo-eye-cw{animation:eyeOrbitCW 800ms ease forwards}
+.o-eye.logo-eye-ccw{animation:eyeOrbitCCW 800ms ease forwards}
+.o-eye.logo-eye-bonk-l{animation:eyeBonkLeft 600ms cubic-bezier(.34,1.56,.64,1) forwards}
+.o-eye.logo-eye-bonk-r{animation:eyeBonkRight 600ms cubic-bezier(.34,1.56,.64,1) forwards}
+
+@keyframes logoSqueeze{
+  0%{transform:scaleX(1) scaleY(1)}
+  30%{transform:scaleX(1.3) scaleY(.7)}
+  60%{transform:scaleX(.9) scaleY(1.1)}
+  100%{transform:scaleX(1) scaleY(1)}
+}
+@keyframes logoJump{
+  0%{transform:translateY(0) scaleX(1) scaleY(1)}
+  35%{transform:translateY(-20px) scaleX(.9) scaleY(1.1)}
+  65%{transform:translateY(0) scaleX(1.2) scaleY(.8)}
+  100%{transform:translateY(0) scaleX(1) scaleY(1)}
+}
+@keyframes logoKiss{
+  0%{transform:scale(1)}40%{transform:scale(.85)}100%{transform:scale(1)}
+}
+@keyframes logoShake{
+  0%{transform:translateX(0) scale(1)}
+  10%{transform:translateX(-6px) scale(1.15)}
+  23%{transform:translateX(6px) scale(1.2)}
+  36%{transform:translateX(-6px) scale(1.2)}
+  49%{transform:translateX(6px) scale(1.2)}
+  62%{transform:translateX(-6px) scale(1.2)}
+  75%{transform:translateX(6px) scale(1.15)}
+  100%{transform:translateX(0) scale(1)}
+}
+@keyframes logoNod{
+  0%{transform:translateY(0) scale(1)}
+  10%{transform:translateY(-5px) scale(.85)}
+  23%{transform:translateY(3px) scale(.75)}
+  36%{transform:translateY(-5px) scale(.7)}
+  49%{transform:translateY(3px) scale(.7)}
+  62%{transform:translateY(-5px) scale(.75)}
+  75%{transform:translateY(3px) scale(.75)}
+  100%{transform:translateY(0) scale(1)}
+}
+@keyframes logoCrazyEyes{
+  0%{transform:scale(1)}25%{transform:scale(1.2)}50%{transform:scale(1.25)}75%{transform:scale(1.2)}100%{transform:scale(1)}
+}
+@keyframes logoBonk{
+  0%{transform:scale(1)}35%{transform:scale(1.1)}50%{transform:scale(1.12)}100%{transform:scale(1)}
+}
+@keyframes logoShrink{
+  0%{transform:scale(1)}
+  40%{transform:scale(.3)}
+  70%{transform:scale(1.1)}
+  100%{transform:scale(1)}
+}
+@keyframes logoGrow{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.7)}
+  65%{transform:scale(.9)}
+  100%{transform:scale(1)}
+}
+@keyframes eyesSpread{
+  0%{gap:14px}
+  40%{gap:28px}
+  70%{gap:16px}
+  100%{gap:14px}
+}
+@keyframes eyesPinch{
+  0%{gap:14px}
+  35%{gap:4px}
+  65%{gap:16px}
+  100%{gap:14px}
+}
+@keyframes eyeOrbitCW{
+  0%{transform:translate(0,0)}12.5%{transform:translate(8px,-8px)}25%{transform:translate(16px,0)}37.5%{transform:translate(8px,8px)}
+  50%{transform:translate(0,0)}62.5%{transform:translate(8px,-8px)}75%{transform:translate(16px,0)}87.5%{transform:translate(8px,8px)}100%{transform:translate(0,0)}
+}
+@keyframes eyeOrbitCCW{
+  0%{transform:translate(0,0)}12.5%{transform:translate(-8px,-8px)}25%{transform:translate(-16px,0)}37.5%{transform:translate(-8px,8px)}
+  50%{transform:translate(0,0)}62.5%{transform:translate(-8px,-8px)}75%{transform:translate(-16px,0)}87.5%{transform:translate(-8px,8px)}100%{transform:translate(0,0)}
+}
+@keyframes eyeBonkLeft{
+  0%{transform:translateX(0)}35%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(2px)}100%{transform:translateX(0)}
+}
+@keyframes eyeBonkRight{
+  0%{transform:translateX(0)}35%{transform:translateX(-8px)}45%{transform:translateX(6px)}60%{transform:translateX(-2px)}100%{transform:translateX(0)}
+}
+
+/* ── CTA Buttons ── */
+.cta-group{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{
+  padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;
+  background:var(--grad-neon);color:#fff;border:none;cursor:pointer;
+  transition:all .3s ease;position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary:hover{
+  box-shadow:0 0 30px rgba(139,92,246,.4),0 0 60px rgba(59,130,246,.2);
+  transform:translateY(-2px);
+}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.btn-primary:hover::after{opacity:1}
+.btn-secondary{
+  padding:14px 32px;border-radius:12px;font-size:16px;font-weight:600;
+  background:rgba(255,255,255,.05);color:#e2e2f0;
+  border:1px solid rgba(255,255,255,.1);cursor:pointer;
+  transition:all .3s ease;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-secondary:hover{
+  background:rgba(255,255,255,.08);border-color:rgba(139,92,246,.3);
+  box-shadow:0 0 20px rgba(139,92,246,.1);
+}
+
+/* ── Feature Cards ── */
+.features{text-align:center}
+.features h2{font-size:clamp(32px,5vw,52px);font-weight:800;margin-bottom:16px;letter-spacing:-.02em}
+.features .sub{color:rgba(226,226,240,.5);font-size:18px;max-width:500px;margin:0 auto 64px}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px}
+.feature-card{
+  padding:32px;border-radius:16px;text-align:left;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  transition:all .4s ease;position:relative;overflow:hidden;
+}
+.feature-card:hover{
+  border-color:rgba(139,92,246,.2);
+  background:rgba(139,92,246,.04);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:var(--grad-neon);opacity:0;transition:opacity .4s;
+}
+.feature-card:hover::before{opacity:1}
+.feature-icon{
+  font-size:32px;margin-bottom:16px;
+  width:56px;height:56px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--grad-subtle);
+}
+.feature-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.feature-card p{font-size:14px;color:rgba(226,226,240,.5);line-height:1.7}
+
+/* ── App Showcase ── */
+.showcase{text-align:center;position:relative}
+.showcase h2{font-size:clamp(32px,5vw,52px);font-weight:800;margin-bottom:16px;letter-spacing:-.02em}
+.showcase .sub{color:rgba(226,226,240,.5);font-size:18px;max-width:500px;margin:0 auto 64px}
+
+.showcase-desktop{
+  position:relative;max-width:960px;margin:0 auto 80px;
+  border-radius:16px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 40px 120px rgba(0,0,0,.5),0 0 80px rgba(139,92,246,.08);
+}
+.showcase-desktop img{width:100%;display:block}
+.showcase-desktop::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 80%,rgba(10,10,18,.8));
+  pointer-events:none;z-index:1;
+}
+
+.showcase-phones{
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;
+  margin-top:48px;
+}
+.phone-frame{
+  width:220px;border-radius:24px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 40px rgba(139,92,246,.06);
+  transition:transform .4s ease;
+}
+.phone-frame:hover{transform:translateY(-8px)}
+.phone-frame img{width:100%;display:block}
+.phone-label{
+  font-size:13px;color:rgba(226,226,240,.4);margin-top:12px;text-align:center;
+}
+
+/* ── How It Works ── */
+.how{text-align:center}
+.how h2{font-size:clamp(32px,5vw,52px);font-weight:800;margin-bottom:16px;letter-spacing:-.02em}
+.how .sub{color:rgba(226,226,240,.5);font-size:18px;max-width:500px;margin:0 auto 64px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:48px;max-width:800px;margin:0 auto}
+.step{position:relative}
+.step-num{
+  font-size:64px;font-weight:900;
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;opacity:.3;line-height:1;margin-bottom:12px;
+}
+.step h3{font-size:18px;font-weight:700;margin-bottom:8px}
+.step p{font-size:14px;color:rgba(226,226,240,.5);line-height:1.7}
+
+/* ── Privacy Badge ── */
+.privacy{
+  text-align:center;padding:80px 32px;
+  background:var(--grad-subtle);
+  border-top:1px solid rgba(255,255,255,.04);
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+.privacy-inner{max-width:640px;margin:0 auto}
+.privacy h2{font-size:clamp(28px,4vw,40px);font-weight:800;margin-bottom:16px}
+.privacy p{font-size:16px;color:rgba(226,226,240,.5);line-height:1.8;margin-bottom:32px}
+.privacy-badges{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.badge{
+  padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:8px;
+}
+
+/* ── Final CTA ── */
+.final-cta{text-align:center;padding:120px 32px}
+.final-cta h2{
+  font-size:clamp(36px,6vw,64px);font-weight:800;margin-bottom:16px;
+  letter-spacing:-.03em;
+}
+.final-cta h2 .grad{
+  background:var(--grad-neon);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.final-cta p{color:rgba(226,226,240,.5);font-size:18px;margin-bottom:40px}
+
+/* ── Footer ── */
+footer{
+  padding:32px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.04);
+  font-size:13px;color:rgba(226,226,240,.3);
+}
+footer a{color:rgba(226,226,240,.5)}
+footer a:hover{color:#fff}
+
+/* ── Scroll Reveal ── */
+.reveal{opacity:0;transform:translateY(30px);transition:all .8s cubic-bezier(.16,1,.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  nav{padding:12px 16px}
+  .nav-links{display:none}
+  section{padding:80px 20px}
+  .feature-grid{grid-template-columns:1fr}
+  .showcase-phones{gap:16px}
+  .phone-frame{width:160px;border-radius:16px}
+  .steps{grid-template-columns:1fr;gap:32px}
+  .cta-group{flex-direction:column;align-items:center}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="particles" id="particles"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">Öppen AI</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#showcase">App</a>
+    <a href="#how">How it works</a>
+    <a href="#privacy">Privacy</a>
+  </div>
+  <a href="https://chat.oppen.ai" class="nav-cta">Open Chat</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>AI that lives<br>on <span class="grad">your device</span></h1>
+  <div class="hero-sub">
+    <span class="tag highlight">Mobile & Desktop</span>
+    <span class="tag highlight">No Servers</span>
+    <span class="tag highlight">No Data Collection</span>
+    <span class="tag highlight">100% Open Source</span>
+    <span class="tag highlight">Free Forever</span>
+  </div>
+
+  <div class="hero-logo" id="hero-logo">
+    <div class="o-ring">
+      <span class="o-char">o</span>
+      <div class="o-eyes">
+        <div class="o-eye"></div>
+        <div class="o-eye"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-group">
+    <a href="https://chat.oppen.ai" class="btn-primary">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12l7-9"/><polyline points="12 10 12 3 5 3"/></svg>
+      Start chatting
+    </a>
+    <a href="#features" class="btn-secondary">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M9 6v4l2 2"/></svg>
+      Learn more
+    </a>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="section-label reveal">Why Öppen AI</div>
+  <h2 class="reveal">Private by design</h2>
+  <p class="sub reveal">Everything runs locally on your device. Your conversations never leave.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128274;</div>
+      <h3>100% Private</h3>
+      <p>Your data stays on your device. No servers, no cloud, no API calls. Zero data collection, period.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#9889;</div>
+      <h3>Runs Offline</h3>
+      <p>Download the AI model once, then chat without internet. Works on planes, trains, and off the grid.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128187;</div>
+      <h3>Truly Open</h3>
+      <p>Open source on GitHub. Inspect the code, contribute, or self-host.<br><a href="https://github.com/oppen-ai" target="_blank" rel="noopener" style="color:var(--neon-cyan);text-decoration:underline">github.com/oppen-ai</a></p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128483;</div>
+      <h3>Voice Input</h3>
+      <p>Speak naturally with on-device Whisper transcription. Your voice never leaves your device.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128196;</div>
+      <h3>Read Documents</h3>
+      <p>Upload PDFs, images, and text files. The AI reads and summarizes them - all locally.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#128171;</div>
+      <h3>Runs Locally</h3>
+      <p>AI models run directly on your device. Supports Llama, Qwen, SmolLM, and other open source models.</p>
+    </div>
+  </div>
+</section>
+
+<!-- App Showcase -->
+<section class="showcase" id="showcase">
+  <div class="section-label reveal">See it in action</div>
+  <h2 class="reveal">Beautiful and simple</h2>
+  <p class="sub reveal">A clean, focused chat experience. Works on latest mobile phones and desktops.</p>
+
+  <div class="showcase-desktop reveal">
+    <img src="img/app-chat-desktop.png" alt="Öppen AI desktop chat" loading="lazy">
+  </div>
+
+  <div class="showcase-phones">
+    <div class="reveal">
+      <div class="phone-frame">
+        <img src="img/app-home-mobile.png" alt="Öppen AI mobile home" loading="lazy">
+      </div>
+      <div class="phone-label">Home</div>
+    </div>
+    <div class="reveal">
+      <div class="phone-frame">
+        <img src="img/app-chat-mobile.png" alt="Öppen AI mobile chat" loading="lazy">
+      </div>
+      <div class="phone-label">Chat</div>
+    </div>
+    <div class="reveal">
+      <div class="phone-frame">
+        <img src="img/app-loading-mobile.png" alt="Öppen AI loading" loading="lazy">
+      </div>
+      <div class="phone-label">Loading</div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how" id="how">
+  <div class="section-label reveal">Simple as 1-2-3</div>
+  <h2 class="reveal">How it works</h2>
+  <p class="sub reveal">No installation, no configuration, no headaches.</p>
+
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">1</div>
+      <h3>Open the page</h3>
+      <p>Visit chat.oppen.ai to try the demo, or download the app to run locally.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">2</div>
+      <h3>Download the brain</h3>
+      <p>A small AI model downloads once to your device. Takes about a minute.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">3</div>
+      <h3>Start talking</h3>
+      <p>Chat, ask questions, upload documents. Everything stays on your device forever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Privacy -->
+<div class="privacy" id="privacy">
+  <div class="privacy-inner reveal">
+    <div class="section-label">Zero trust required</div>
+    <h2>We can't see your data.<br>Because it never leaves.</h2>
+    <p>Most AI chats send every message to a server. Öppen AI runs the model directly on your device. Your conversations are stored locally and never transmitted. We literally cannot access them.</p>
+    <div class="privacy-badges">
+      <div class="badge">&#128274; No servers</div>
+      <div class="badge">&#128683; No tracking</div>
+      <div class="badge">&#127760; Works offline</div>
+      <div class="badge">&#128272; Encrypted memory</div>
+    </div>
+  </div>
+</div>
+
+<!-- Final CTA -->
+<section class="final-cta">
+  <h2 class="reveal">Ready to go <span class="grad">private</span>?</h2>
+  <p class="reveal">No signup. No download. Just open and chat.</p>
+  <div class="cta-group reveal">
+    <a href="https://chat.oppen.ai" class="btn-primary">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12l7-9"/><polyline points="12 10 12 3 5 3"/></svg>
+      Open Öppen AI
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone &middot; <a href="https://chat.oppen.ai">chat.oppen.ai</a></p>
+</footer>
+
+<script>
+// ── Particles ──
+(function(){
+  const c=document.getElementById('particles');
+  const colors=['rgba(59,130,246,.6)','rgba(139,92,246,.6)','rgba(217,70,239,.5)','rgba(34,211,238,.5)'];
+  for(let i=0;i<30;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const size=2+Math.random()*4;
+    p.style.cssText=`
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      box-shadow:0 0 ${size*3}px ${colors[Math.floor(Math.random()*colors.length)]};
+      animation-duration:${8+Math.random()*12}s;
+      animation-delay:${-Math.random()*20}s;
+    `;
+    c.appendChild(p);
+  }
+})();
+
+// ── Scroll Reveal ──
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}
+  });
+},{threshold:.15,rootMargin:'0px 0px -40px 0px'});
+reveals.forEach(el=>observer.observe(el));
+
+// ── Logo Animations (matching chat app) ──
+const TAP_ANIMATIONS=['logo-squeeze','logo-jump','logo-kiss','logo-shake','logo-nod','logo-crazy-eyes','logo-bonk','logo-shrink','logo-grow'];
+const EYE_CLASSES=['logo-eye-cw','logo-eye-ccw','logo-eye-bonk-l','logo-eye-bonk-r'];
+const logo=document.getElementById('hero-logo');
+let blinkTimer=null;
+
+function clearAnims(){
+  for(const c of TAP_ANIMATIONS)logo.classList.remove(c);
+  const eyes=logo.querySelectorAll('.o-eye');
+  for(const eye of eyes)for(const c of EYE_CLASSES)eye.classList.remove(c);
+}
+
+function playSingle(onDone){
+  if(!logo){onDone();return}
+  clearAnims();
+  void logo.offsetWidth; // reflow
+  const cls=TAP_ANIMATIONS[Math.floor(Math.random()*TAP_ANIMATIONS.length)];
+  logo.classList.add(cls);
+  // Per-eye animations
+  const eyes=logo.querySelectorAll('.o-eye');
+  if(cls==='logo-crazy-eyes'&&eyes.length===2){eyes[0].classList.add('logo-eye-cw');eyes[1].classList.add('logo-eye-ccw')}
+  else if(cls==='logo-bonk'&&eyes.length===2){eyes[0].classList.add('logo-eye-bonk-l');eyes[1].classList.add('logo-eye-bonk-r')}
+  const charAnims=['logo-shrink','logo-grow'];
+  const target=charAnims.includes(cls)?logo.querySelector('.o-char'):logo.querySelector('.o-ring');
+  target.addEventListener('animationend',(e)=>{if(e.animationName.startsWith('logo')){clearAnims();onDone()}},{once:true});
+}
+
+function playRandom(){
+  // Double animation: play once, 100ms pause, play again (like the app)
+  playSingle(()=>setTimeout(()=>playSingle(()=>scheduleBlink()),100));
+}
+
+function scheduleBlink(){
+  if(blinkTimer)clearTimeout(blinkTimer);
+  blinkTimer=setTimeout(playRandom,3000+Math.random()*2000); // 3-5s
+}
+
+// Start auto-animating after 500ms
+blinkTimer=setTimeout(playRandom,500);
+
+// Click to trigger
+logo.addEventListener('click',()=>{
+  if(blinkTimer)clearTimeout(blinkTimer);
+  playRandom();
+});
+
+// ── Mouse tracking for O + eyes (eye range reduced 30%) ──
+const MAX_CHAR=4;
+const MAX_EYES=4; // was ~6, reduced 30%
+document.addEventListener('mousemove',(e)=>{
+  const ring=logo.querySelector('.o-ring');
+  const oChar=logo.querySelector('.o-char');
+  const eyes=logo.querySelector('.o-eyes');
+  if(!ring||!oChar||!eyes)return;
+  const rect=ring.getBoundingClientRect();
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top+rect.height/2;
+  const dx=e.clientX-cx;
+  const dy=e.clientY-cy;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist===0)return;
+  const factor=Math.min(dist/300,1);
+  const nx=dx/dist;
+  const ny=dy/dist;
+  oChar.style.transform=`translate(${nx*MAX_CHAR*factor}px,${ny*MAX_CHAR*factor}px)`;
+  eyes.style.transform=`translateX(-50%) translate(${nx*MAX_EYES*factor}px,${ny*MAX_EYES*factor}px)`;
+});
+
+// ── Smooth nav hide/show ──
+let lastScroll=0;
+const nav=document.querySelector('nav');
+window.addEventListener('scroll',()=>{
+  const st=window.scrollY;
+  if(st>lastScroll&&st>100)nav.style.transform='translateY(-100%)';
+  else nav.style.transform='translateY(0)';
+  nav.style.transition='transform .3s ease';
+  lastScroll=st;
+},{ passive:true });
+</script>
+
+</body>
+</html>
