@@ -1,0 +1,289 @@
+/* Öppen AI cookie-consent theme — matches site palette */
+
+#cc-main{
+  --cc-font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+  --cc-bg:#0f0f1a;
+  --cc-primary-color:#e2e2f0;
+  --cc-secondary-color:rgba(226,226,240,.6);
+  --cc-link-color:#c4b5fd;
+  --cc-separator-border-color:rgba(255,255,255,.06);
+  --cc-modal-border-radius:12px;
+  --cc-btn-border-radius:8px;
+  --cc-overlay-bg:rgba(10,10,18,.72);
+}
+
+/* ── Consent banner (.cm) ───────────────────────────────── */
+
+#cc-main .cm{
+  max-width:380px !important;
+  border:1px solid rgba(139,92,246,.3) !important;
+  box-shadow:0 10px 40px rgba(139,92,246,.22),0 0 0 1px rgba(0,0,0,.5) !important;
+}
+#cc-main .cm__body{padding:14px 16px !important}
+#cc-main .cm__texts{padding:0 !important;margin:0 !important}
+#cc-main .cm__title{
+  font-size:14px !important;font-weight:700 !important;
+  padding:0 !important;margin:0 0 6px !important;line-height:1.3 !important;
+}
+#cc-main .cm__desc{
+  font-size:12px !important;line-height:1.55 !important;
+  padding:0 !important;margin:0 0 12px !important;
+  color:rgba(226,226,240,.75) !important;
+}
+#cc-main .cm__desc a{color:#c4b5fd !important;text-decoration:underline !important}
+/* Use CSS grid so Accept, Reject and Options end up *exactly* equal width,
+   regardless of the wrapper `.cm__btn-group` that holds the first two. */
+#cc-main .cm__btns{
+  display:grid !important;
+  grid-template-columns:1fr 1fr 1fr !important;
+  align-items:center !important;
+  gap:6px !important;
+  padding:0 !important;margin:0 !important;border-top:none !important;
+}
+/* display:contents pulls Accept+Reject up into the grid directly */
+#cc-main .cm__btn-group{
+  display:contents !important;
+}
+
+/* ── Shared button reset for .cm and .pm ─────────────────── */
+
+#cc-main .cm__btn,
+#cc-main .pm__btn{
+  font-family:inherit !important;font-weight:600 !important;
+  margin:0 !important;white-space:nowrap !important;
+  line-height:1 !important;
+  display:inline-flex !important;align-items:center !important;justify-content:center !important;
+  border:1px solid transparent !important;
+  border-radius:8px !important;
+  transition:all .15s ease !important;
+  cursor:pointer !important;
+}
+
+/* Override the library's `.cm__btn+.cm__btn{margin-top:.375rem}` — we want the
+   consent banner buttons to be a strict horizontal row with zero margins,
+   controlled by grid-gap. Scoped to .cm__ only so .pm__ can keep its own spacing. */
+#cc-main .cm__btns .cm__btn,
+#cc-main .cm__btn+.cm__btn,
+#cc-main .cm__btn-group+.cm__btn-group,
+#cc-main .cm__btn-group .cm__btn{
+  margin:0 !important;
+}
+#cc-main .cm__btn{
+  font-size:12px !important;
+  padding:0 10px !important;
+  min-width:0 !important;
+  width:100% !important;
+  justify-self:stretch !important;
+  height:34px !important;min-height:34px !important;
+  box-sizing:border-box !important;
+  vertical-align:middle !important;
+}
+#cc-main .pm__btn{
+  font-size:13px !important;
+  padding:0 18px !important;
+  height:38px !important;min-height:38px !important;
+}
+
+/* Primary (Accept / Accept all) — gradient */
+#cc-main .cm__btn[data-role="all"],
+#cc-main .pm__btn[data-role="all"]{
+  background:linear-gradient(135deg,#8b5cf6,#d946ef) !important;
+  color:#fff !important;
+  border-color:transparent !important;
+}
+#cc-main .cm__btn[data-role="all"]:hover,
+#cc-main .pm__btn[data-role="all"]:hover{filter:brightness(1.12) !important}
+
+/* Secondary (Reject, Options, Save) — outlined tinted */
+#cc-main .cm__btn[data-role="necessary"],
+#cc-main .cm__btn[data-role="show"],
+#cc-main .pm__btn[data-role="necessary"],
+#cc-main .pm__btn[data-role="save"]{
+  background:rgba(139,92,246,.12) !important;
+  color:#e2e2f0 !important;
+  border-color:rgba(139,92,246,.4) !important;
+}
+#cc-main .cm__btn[data-role="necessary"]:hover,
+#cc-main .cm__btn[data-role="show"]:hover,
+#cc-main .pm__btn[data-role="necessary"]:hover,
+#cc-main .pm__btn[data-role="save"]:hover{
+  background:rgba(139,92,246,.22) !important;
+  border-color:rgba(139,92,246,.6) !important;
+}
+
+/* ── Preferences modal (.pm) ─────────────────────────────── */
+
+#cc-main .pm{
+  background:#0f0f1a !important;
+  border:1px solid rgba(139,92,246,.4) !important;
+  box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 0 1px rgba(139,92,246,.12) !important;
+  color:#e2e2f0 !important;
+}
+#cc-main .pm__header{
+  border-bottom:1px solid rgba(139,92,246,.4) !important;
+  padding:18px 22px !important;
+}
+#cc-main .pm__title{
+  color:#fff !important;font-size:16px !important;font-weight:700 !important;
+}
+#cc-main .pm__close-btn{
+  background:rgba(139,92,246,.12) !important;
+  border:1px solid rgba(139,92,246,.4) !important;
+  color:#fff !important;
+  border-radius:8px !important;
+}
+#cc-main .pm__close-btn:hover{
+  background:rgba(139,92,246,.22) !important;
+  border-color:rgba(139,92,246,.6) !important;
+}
+#cc-main .pm__close-btn svg{fill:currentColor !important;stroke:currentColor !important;color:#fff !important}
+#cc-main .pm__body{padding:18px 22px !important}
+
+/* Section cards — the accordion-style category rows.
+   The library uses modifier classes like .pm__section--toggle / --expandable. */
+#cc-main .pm__section,
+#cc-main [class*="pm__section--"]{
+  background:rgba(139,92,246,.05) !important;
+  /* Match the secondary button border colour so the two feel like one system */
+  border:1px solid rgba(139,92,246,.4) !important;
+  border-radius:10px !important;
+  color:#e2e2f0 !important;
+  margin-bottom:10px !important;
+  overflow:hidden !important;
+}
+/* The library draws its own borders on inner title/desc wrappers and on the
+   title button itself — these overlap the outer card border at the corners
+   and show as "darker spots". Wipe them all. */
+#cc-main .pm__section-title-wrapper,
+#cc-main .pm__section-desc-wrapper,
+#cc-main .pm__section-title{
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+/* When a section is expanded, draw a single separator line between the
+   heading row and the description. Only applied to expanded sections so it
+   doesn't double up with the card's own bottom border when collapsed. */
+#cc-main .pm__section--toggle.is-expanded .pm__section-title-wrapper{
+  border-bottom:1px solid rgba(139,92,246,.4) !important;
+}
+#cc-main .pm__section-title-wrapper{
+  background:transparent !important;
+  color:#fff !important;
+}
+#cc-main .pm__section-title{
+  color:#fff !important;
+  background:transparent !important;
+  font-weight:600 !important;
+  font-size:14px !important;
+}
+#cc-main .pm__section-title:hover{
+  background:rgba(139,92,246,.06) !important;
+}
+#cc-main .pm__section-desc-wrapper{
+  background:transparent !important;
+}
+#cc-main .pm__section-desc{
+  color:rgba(226,226,240,.72) !important;
+  background:transparent !important;
+  font-size:13px !important;
+  line-height:1.55 !important;
+}
+/* Chevron — kill the light-grey circle the library paints behind it */
+#cc-main .pm__section-arrow{
+  background:transparent !important;
+  box-shadow:none !important;
+  color:rgba(226,226,240,.6) !important;
+  width:20px !important;height:20px !important;
+}
+#cc-main .pm__section-arrow svg{fill:currentColor !important;stroke:currentColor !important}
+
+/* Toggle switches */
+#cc-main .section__toggle-wrapper{
+  background:rgba(255,255,255,.12) !important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06) !important;
+}
+#cc-main .toggle__icon{
+  background:#fff !important;
+  box-shadow:0 1px 4px rgba(0,0,0,.3) !important;
+}
+#cc-main .toggle__icon svg{fill:#0f0f1a !important;stroke:#0f0f1a !important}
+/* ON state — when the underlying checkbox is checked */
+#cc-main .section__toggle:checked ~ .toggle__icon,
+#cc-main .section__toggle-wrapper:has(.section__toggle:checked){
+  background:linear-gradient(135deg,#8b5cf6,#d946ef) !important;
+}
+
+/* Toggle switches */
+#cc-main .section__toggle-wrapper,
+#cc-main .pm__section-toggle{
+  background:rgba(255,255,255,.08) !important;
+}
+#cc-main .section__toggle:checked + .pm__section-toggle-label,
+#cc-main .section__toggle:checked + label{
+  background:#8b5cf6 !important;
+}
+
+#cc-main .pm__footer{
+  border-top:1px solid rgba(139,92,246,.4) !important;
+  background:transparent !important;
+  padding:16px 22px !important;
+  gap:10px !important;
+}
+/* Footer uses two sibling `.pm__btn-group`s (Accept/Reject on the left,
+   Save preferences on the right). Give each its own horizontal gap; the
+   space between the two groups comes from the footer's gap above. */
+#cc-main .pm__btn-group{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  gap:10px !important;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+
+@media(max-width:520px){
+  #cc-main .cm{
+    max-width:calc(100vw - 24px) !important;
+    margin:12px !important;
+  }
+  #cc-main .cm__btn{
+    height:40px !important;min-height:40px !important;
+    font-size:13px !important;
+  }
+  #cc-main .pm{
+    max-width:calc(100vw - 24px) !important;
+    margin:12px !important;
+  }
+  #cc-main .pm__body,
+  #cc-main .pm__header,
+  #cc-main .pm__footer{padding:14px 16px !important}
+  #cc-main .pm__btn{
+    height:42px !important;min-height:42px !important;
+    font-size:13px !important;
+    padding:0 14px !important;
+    width:100% !important;
+  }
+  /* Stack footer buttons vertically on mobile */
+  #cc-main .pm__footer{
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:10px !important;
+  }
+  #cc-main .pm__btn-group{
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:10px !important;
+    width:100% !important;
+  }
+  /* Wipe library margins between stacked buttons — rely on flex gap only */
+  #cc-main .pm__footer .pm__btn,
+  #cc-main .pm__btn+.pm__btn,
+  #cc-main .pm__btn-group+.pm__btn,
+  #cc-main .pm__btn+.pm__btn-group,
+  #cc-main .pm__btn-group+.pm__btn-group,
+  #cc-main .pm__btn-group .pm__btn{
+    margin:0 !important;
+  }
+}

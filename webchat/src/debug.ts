@@ -183,11 +183,11 @@ export function interceptFetch(): void {
 		try {
 			const resp = await origFetch.call(window, input, init);
 			if (!resp.ok) {
-				dlog("warn", "fetch", `${resp.status} ${resp.statusText} — ${shortUrl}`);
+				dlog("warn", "fetch", `${resp.status} ${resp.statusText} - ${shortUrl}`);
 			}
 			return resp;
 		} catch (e) {
-			dlog("error", "fetch", `FAILED ${shortUrl} — ${stringify(e)}`);
+			dlog("error", "fetch", `FAILED ${shortUrl} - ${stringify(e)}`);
 			throw e;
 		}
 	};

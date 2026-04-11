@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terms &amp; Conditions - Öppen AI</title>
+<meta name="description" content="Terms and conditions for using Öppen AI - a free, open-source, on-device AI chat project.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oppen.ai/terms.html">
+<meta name="theme-color" content="#0a0a12">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css">
+<link rel="stylesheet" href="/cookie-consent.css">
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+<script defer src="/cookie-consent.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  background:#0a0a12;
+  color:#e2e2f0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+  line-height:1.7;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+a{color:#8b5cf6;text-decoration:none;border-bottom:1px solid rgba(139,92,246,.4)}
+a:hover{color:#d946ef;border-color:#d946ef}
+
+.bg-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bg-glow::before,.bg-glow::after{
+  content:'';position:absolute;border-radius:50%;filter:blur(120px);opacity:.35;
+}
+.bg-glow::before{
+  width:600px;height:600px;top:-200px;left:-100px;
+  background:radial-gradient(circle,rgba(59,130,246,.4),transparent 70%);
+}
+.bg-glow::after{
+  width:500px;height:500px;bottom:-150px;right:-100px;
+  background:radial-gradient(circle,rgba(139,92,246,.35),transparent 70%);
+}
+
+nav{
+  padding:20px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+nav .brand{
+  font-size:20px;font-weight:700;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#d946ef);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  border:none;
+}
+
+main{
+  flex:1;
+  max-width:760px;
+  margin:0 auto;
+  padding:64px 32px 96px;
+  width:100%;
+}
+h1{
+  font-size:clamp(32px,5vw,48px);
+  font-weight:800;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#d946ef);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.updated{color:rgba(226,226,240,.4);font-size:14px;margin-bottom:48px}
+h2{
+  font-size:22px;font-weight:700;margin-top:40px;margin-bottom:12px;
+  color:#fff;
+}
+p,ul{margin-bottom:16px;color:rgba(226,226,240,.85)}
+ul{padding-left:20px}
+li{margin-bottom:6px}
+strong{color:#fff}
+
+.callout{
+  padding:20px 24px;
+  border:1px solid rgba(139,92,246,.25);
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(139,92,246,.06));
+  margin:24px 0;
+}
+
+footer{
+  padding:32px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.04);
+  font-size:13px;color:rgba(226,226,240,.3);
+}
+footer a{color:rgba(226,226,240,.5);border:none}
+footer a:hover{color:#fff}
+
+@media(max-width:768px){
+  nav{padding:16px}
+  main{padding:40px 20px 64px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<nav>
+  <a href="/" class="brand">Öppen AI</a>
+  <a href="/" style="font-size:14px;color:rgba(226,226,240,.6);border:none">&larr; Back to home</a>
+</nav>
+
+<main>
+  <h1>Terms &amp; Conditions</h1>
+  <p class="updated">Last updated: 11 April 2026</p>
+
+  <div class="callout">
+    <p style="margin:0"><strong>The short version:</strong> Öppen AI is free, open-source software that runs on your own device. You can use it, modify it, and share it under the MIT License. We don't run it for you, we don't see your data, and - like any open-source project - we offer it "as is" with no warranty. Please don't use it to hurt people, and please don't treat AI outputs as professional advice.</p>
+  </div>
+
+  <h2>1. Introduction</h2>
+  <p>These Terms &amp; Conditions ("<strong>Terms</strong>") govern your access to and use of the Öppen AI website at <a href="https://oppen.ai">oppen.ai</a>, the chat application at <a href="https://chat.oppen.ai">chat.oppen.ai</a>, and the associated open-source software (collectively, the "<strong>Service</strong>"). By using the Service you agree to these Terms. If you do not agree, please do not use the Service.</p>
+  <p>The Service is operated by the Öppen AI project ("<strong>we</strong>", "<strong>us</strong>", "<strong>our</strong>"), maintained by <a href="https://github.com/oppen-ai">community</a> as an independent open-source project.</p>
+
+  <h2>2. What the Service is</h2>
+  <p>Öppen AI is a free, open-source web application that runs a large language model ("<strong>LLM</strong>") directly in your browser, using WebGPU and WebAssembly. It is a <strong>client-side</strong> application: the model, the inference, and your conversations all live on your device. We do not operate any backend that processes, stores, or receives your prompts or outputs.</p>
+  <p>The Service is provided <strong>free of charge</strong> and without any guarantee of availability, uptime, or continued development.</p>
+
+  <h2>3. License and intellectual property</h2>
+  <p>The Öppen AI source code is released under the <strong>MIT License</strong>. You are free to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, subject to the license's terms (which include retaining the copyright notice and a disclaimer of warranty).</p>
+  <p>The name "<strong>Öppen AI</strong>", the logo, and the visual design of this website are the intellectual property of the project maintainer. You may reference the project factually (for example, to link to it or describe it), but please do not use the name or logo in a way that suggests endorsement, affiliation, or origin from us.</p>
+  <p>Third-party model weights loaded by the chat application are licensed separately by their respective authors (for example, under Apache 2.0, Llama Community License, or similar). Your use of those models is governed by those licenses. You are responsible for reading and complying with the license of any model you choose to load.</p>
+
+  <h2>4. Your content</h2>
+  <p>Because the chat runs entirely in your browser, the prompts you type and the responses you receive stay on your device. <strong>We do not have access to them.</strong> For details, see our <a href="/privacy.html">Privacy Policy</a>.</p>
+  <p>You retain all rights to the content you create with the Service. You are solely responsible for ensuring that your use of the Service, and any content you generate with it, complies with applicable laws and the licenses of any third-party models you use.</p>
+
+  <h2>5. Acceptable use</h2>
+  <p>You agree not to use the Service to:</p>
+  <ul>
+    <li>Break any law, regulation, or third-party right that applies to you;</li>
+    <li>Generate content that exploits, harms, or depicts the sexual abuse of minors;</li>
+    <li>Produce or distribute unlawful, defamatory, or knowingly deceptive material;</li>
+    <li>Harass, stalk, threaten, or incite violence against other people;</li>
+    <li>Attempt to identify or target individuals without their consent;</li>
+    <li>Generate malware, exploits, or other material intended to compromise computer systems;</li>
+    <li>Circumvent security or rate-limiting measures of any third-party services the application may optionally connect to;</li>
+    <li>Misrepresent AI-generated content as human-authored in contexts where that misrepresentation causes harm.</li>
+  </ul>
+  <p>Because the Service runs on your own device, <strong>we cannot technically prevent any of these uses</strong> - but if you do any of them, you do so on your own responsibility, and you accept full liability for the consequences.</p>
+
+  <h2>6. AI output disclaimer</h2>
+  <p>Large language models can, and regularly do, produce output that is incorrect, incomplete, misleading, biased, outdated, or fabricated ("<em>hallucinated</em>"). Öppen AI is no exception.</p>
+  <p>You should <strong>not</strong> rely on AI-generated output as a substitute for professional advice. In particular, nothing produced by the Service constitutes:</p>
+  <ul>
+    <li>Legal advice</li>
+    <li>Medical, health, or psychological advice</li>
+    <li>Financial, investment, or tax advice</li>
+    <li>Safety-critical guidance (e.g. engineering, aviation, industrial, automotive)</li>
+  </ul>
+  <p>If you need advice in any of these areas, please consult a qualified, licensed professional. You are solely responsible for verifying any information before acting on it.</p>
+
+  <h2>7. No warranty</h2>
+  <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, OR FREE OF HARMFUL COMPONENTS, OR THAT ANY OUTPUTS WILL BE ACCURATE OR RELIABLE.</p>
+
+  <h2>8. Limitation of liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE PROJECT MAINTAINERS, CONTRIBUTORS, OR COPYRIGHT HOLDERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES (INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, DATA, GOODWILL, OR OTHER INTANGIBLE LOSSES) ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF, OR INABILITY TO USE, THE SERVICE - WHETHER BASED ON CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, OR ANY OTHER LEGAL THEORY, EVEN IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+  <p>Some jurisdictions do not allow the exclusion of certain warranties or the limitation or exclusion of liability for certain damages. In such jurisdictions, the above limitations apply to the maximum extent permitted by law. Nothing in these Terms limits any rights you have that cannot be lawfully limited, including statutory consumer rights.</p>
+
+  <h2>9. Indemnity</h2>
+  <p>You agree to indemnify and hold harmless the project maintainers and contributors from any claims, damages, liabilities, or expenses (including reasonable legal fees) arising out of your use of the Service, your breach of these Terms, or your violation of any law or third-party right.</p>
+
+  <h2>10. Age and capacity</h2>
+  <p>You must be at least 16 years old (or the minimum age of digital consent in your country, whichever is higher) to use the Service. If you are under the age of majority in your jurisdiction, you may only use the Service with the involvement of a parent or legal guardian. Öppen AI is not directed to children under 13 and we do not knowingly collect data from them.</p>
+
+  <h2>11. Third-party services</h2>
+  <p>The website uses a small number of third-party services, each of which has its own terms and privacy practices:</p>
+  <ul>
+    <li><strong>Google Analytics</strong> (optional, consent-based) - for aggregate visitor statistics.</li>
+    <li><strong>Amazon Web Services (S3)</strong> - for static hosting.</li>
+    <li><strong>Cloudflare</strong> - for CDN and DNS.</li>
+  </ul>
+  <p>We do not control these services and are not responsible for their content, availability, or practices.</p>
+
+  <h2>12. Changes to the Service and these Terms</h2>
+  <p>We may add, change, suspend, or discontinue any part of the Service at any time, without notice. We may also update these Terms from time to time. When we make material changes, we'll reflect the update in the "Last updated" date at the top of this page. Your continued use of the Service after a change means you accept the updated Terms.</p>
+
+  <h2>13. Governing law and jurisdiction</h2>
+  <p>These Terms are governed by the laws of <strong>England and Wales</strong>, without regard to its conflict-of-laws rules. Any dispute arising out of or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts of England and Wales, except where mandatory consumer-protection law in your country of residence grants you the right to bring proceedings in your local courts.</p>
+
+  <h2>14. Severability</h2>
+  <p>If any provision of these Terms is found to be unenforceable, the remaining provisions remain in full force and effect.</p>
+
+  <h2>15. Contact</h2>
+  <p>Questions about these Terms? Please email <a href="mailto:hello@oppen.ai">hello@oppen.ai</a>.</p>
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone<br><a href="/about.html">About</a> | <a href="/privacy.html">Privacy</a> | <a href="/terms.html">Terms</a> | <a href="#" onclick="event.preventDefault();CookieConsent.showPreferences();">Cookies</a></p>
+</footer>
+
+</body>
+</html>

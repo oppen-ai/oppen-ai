@@ -34,7 +34,7 @@ if [ -z "$ENV" ]; then
 fi
 
 echo "=== oppen-webchat: Deploy ($ENV) ==="
-[ "$TEST_MODE" -eq 1 ] && echo "*** TEST MODE — no changes will be made ***"
+[ "$TEST_MODE" -eq 1 ] && echo "*** TEST MODE - no changes will be made ***"
 echo ""
 
 # --- Load .env ---
@@ -98,7 +98,7 @@ echo "[OK] Artifact: $ARTIFACT_PATH ($FILE_COUNT files, $TOTAL_SIZE)"
 
 # --- Validate Cloudflare config ---
 if [ -z "$CF_API_TOKEN" ] || [ -z "$CF_ZONE_ID" ]; then
-    echo "WARNING: CF_API_TOKEN or CF_ZONE_ID not set — cache purge will be skipped"
+    echo "WARNING: CF_API_TOKEN or CF_ZONE_ID not set - cache purge will be skipped"
     CF_PURGE=0
 else
     CF_PURGE=1

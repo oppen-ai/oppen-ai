@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About - Öppen AI</title>
+<meta name="description" content="About Öppen AI - a truly open, private, on-device AI project. Öppen means &quot;open&quot; in Swedish. Independent and not affiliated with OpenAI, Inc.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://oppen.ai/about.html">
+<meta name="theme-color" content="#0a0a12">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css">
+<link rel="stylesheet" href="/cookie-consent.css">
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+<script defer src="/cookie-consent.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  background:#0a0a12;
+  color:#e2e2f0;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+  line-height:1.7;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+a{color:#8b5cf6;text-decoration:none;border-bottom:1px solid rgba(139,92,246,.4)}
+a:hover{color:#d946ef;border-color:#d946ef}
+
+.bg-glow{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bg-glow::before,.bg-glow::after{
+  content:'';position:absolute;border-radius:50%;filter:blur(120px);opacity:.35;
+}
+.bg-glow::before{
+  width:600px;height:600px;top:-200px;left:-100px;
+  background:radial-gradient(circle,rgba(59,130,246,.4),transparent 70%);
+}
+.bg-glow::after{
+  width:500px;height:500px;bottom:-150px;right:-100px;
+  background:radial-gradient(circle,rgba(139,92,246,.35),transparent 70%);
+}
+
+nav{
+  padding:20px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+nav .brand{
+  font-size:20px;font-weight:700;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#d946ef);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  border:none;
+}
+
+main{
+  flex:1;
+  max-width:760px;
+  margin:0 auto;
+  padding:64px 32px 96px;
+  width:100%;
+}
+h1{
+  font-size:clamp(32px,5vw,48px);
+  font-weight:800;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#d946ef);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.subtitle{color:rgba(226,226,240,.5);font-size:16px;margin-bottom:48px}
+h2{
+  font-size:22px;font-weight:700;margin-top:40px;margin-bottom:12px;
+  color:#fff;
+}
+p{margin-bottom:16px;color:rgba(226,226,240,.85)}
+strong{color:#fff}
+
+.callout{
+  padding:20px 24px;
+  border:1px solid rgba(139,92,246,.25);
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(59,130,246,.06),rgba(139,92,246,.06));
+  margin:24px 0;
+}
+.callout.disclaimer{
+  border-color:rgba(251,191,36,.25);
+  background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(251,113,133,.05));
+}
+
+.face{
+  text-align:center;
+  font-size:clamp(72px,14vw,140px);
+  line-height:1;
+  margin:32px 0 16px;
+  background:linear-gradient(135deg,#3b82f6,#8b5cf6,#d946ef);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-weight:900;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;
+}
+.face-caption{
+  text-align:center;
+  font-size:14px;
+  color:rgba(226,226,240,.45);
+  margin-bottom:32px;
+  font-style:italic;
+}
+
+footer{
+  padding:32px;text-align:center;
+  border-top:1px solid rgba(255,255,255,.04);
+  font-size:13px;color:rgba(226,226,240,.3);
+}
+footer a{color:rgba(226,226,240,.5);border:none}
+footer a:hover{color:#fff}
+
+@media(max-width:768px){
+  nav{padding:16px}
+  main{padding:40px 20px 64px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<nav>
+  <a href="/" class="brand">Öppen AI</a>
+  <a href="/" style="font-size:14px;color:rgba(226,226,240,.6);border:none">&larr; Back to home</a>
+</nav>
+
+<main>
+  <h1>About Öppen AI</h1>
+  <p class="subtitle">Private AI that actually stays private - open in every sense of the word.</p>
+
+  <div class="face" aria-hidden="true">Ö</div>
+  <p class="face-caption">Say hi to Ö. The two dots above are a Swedish umlaut - and, if you look at them for a second, a little pair of friendly eyes peering back at you. Private. Local. Yours.</p>
+
+  <h2>What "Öppen" means</h2>
+  <p><strong>Öppen</strong> (pronounced roughly <em>/ˈœpːɛn/</em> with rounded lips) is the Swedish word for <strong>open</strong>. We picked it because the project is open in every sense we could think of:</p>
+  <p>&bull; <strong>Open source</strong> - the code is MIT-licensed and lives on GitHub. Read it, fork it, audit it, improve it.<br>
+     &bull; <strong>Open weights</strong> - we run permissively-licensed community models directly in your browser.<br>
+     &bull; <strong>Open about your data</strong> - we don't collect any of it, because the chat runs entirely on your device. There is no backend for us to spy on you with.</p>
+  <p>The umlaut isn't just for fun - it's a small reminder that this project has a personality and a point of view.</p>
+
+  <h2>What we actually do</h2>
+  <p>Öppen AI is a static web page that loads an LLM and runs inference <strong>inside your browser</strong>, using WebGPU and WebAssembly. Your prompts, your conversations, and any files you share with the model never leave your machine. We do not operate servers that see your chat. We do not train models on your data. We do not have accounts, because we don't need to know who you are.</p>
+
+  <h2>Who we are</h2>
+  <p>Öppen AI is an independent open-source project maintained by <strong><a href="https://github.com/oppen-ai">community</a></strong>. There is no company, no investors, no hosted service, and no business model. If that changes, this page will change too.</p>
+
+  <div class="callout disclaimer">
+    <h2 style="margin-top:0">A note about the name, and OpenAI</h2>
+    <p><strong>Öppen is not affiliated with, endorsed by, sponsored by, or in any way connected to OpenAI, Inc., OpenAI OpCo, LLC, or any of their subsidiaries or affiliates.</strong> We have no business relationship with OpenAI, no partnership, no licensing agreement, and no shared personnel.</p>
+    <p>"<strong>OpenAI</strong>", "<strong>ChatGPT</strong>", "<strong>GPT</strong>", and related marks are trademarks of OpenAI, Inc. and its affiliates. We reference them here solely to clarify what Öppen <em>is not</em>, which we believe is nominative fair use.</p>
+    <p>We also want to be clear that we are <strong>not a competitor</strong> to OpenAI's products or services:</p>
+    <p>&bull; We do not sell API access, and we don't run inference on servers.<br>
+       &bull; We do not train, fine-tune, or distribute our own frontier models.<br>
+       &bull; We do not offer a hosted chat product that you log into.<br>
+       &bull; We run <em>other people's</em> open-weight models, locally, for free.</p>
+    <p>We chose "Öppen" because the Swedish word <em>öppen</em> captures exactly the value we care about - <strong>openness</strong> - and because the umlaut gave us a small, cheerful piece of personality (those two eyes looking back at you). We did not choose it to confuse anyone, and we'll always try to make the distinction obvious: different name, different company, different country, different philosophy.</p>
+    <p>If you were looking for OpenAI's products, you probably want <a href="https://openai.com">openai.com</a>. If you were looking for a truly open, truly private AI that runs on your own hardware - welcome. You're in the right place.</p>
+  </div>
+
+  <h2>How to reach us</h2>
+  <p>General questions: <a href="mailto:hello@oppen.ai">hello@oppen.ai</a></p>
+</main>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone<br><a href="/about.html">About</a> | <a href="/privacy.html">Privacy</a> | <a href="/terms.html">Terms</a> | <a href="#" onclick="event.preventDefault();CookieConsent.showPreferences();">Cookies</a></p>
+</footer>
+
+</body>
+</html>

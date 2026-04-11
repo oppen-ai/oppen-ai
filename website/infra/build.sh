@@ -26,6 +26,11 @@ mkdir -p "$ARTIFACT_DIR"
 
 # Copy static files
 cp "$APP_DIR/index.html" "$ARTIFACT_DIR/"
+cp "$APP_DIR/privacy.html" "$ARTIFACT_DIR/"
+cp "$APP_DIR/terms.html" "$ARTIFACT_DIR/"
+cp "$APP_DIR/about.html" "$ARTIFACT_DIR/"
+cp "$APP_DIR/cookie-consent.css" "$ARTIFACT_DIR/"
+cp "$APP_DIR/cookie-consent.js" "$ARTIFACT_DIR/"
 cp "$APP_DIR/og-image.png" "$ARTIFACT_DIR/" 2>/dev/null || true
 cp "$APP_DIR/favicon.ico" "$ARTIFACT_DIR/" 2>/dev/null || true
 cp "$APP_DIR/favicon.svg" "$ARTIFACT_DIR/" 2>/dev/null || true

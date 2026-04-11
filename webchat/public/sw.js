@@ -24,19 +24,19 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
 	const url = new URL(event.request.url);
 
-	// Model files from HuggingFace — cache-first (immutable, large)
+	// Model files from HuggingFace - cache-first (immutable, large)
 	if (url.hostname.includes("huggingface.co") || url.hostname.includes("hf.co")) {
 		event.respondWith(cacheFirstModel(event.request));
 		return;
 	}
 
-	// App shell (HTML, JS, CSS) — cache-first with network update
+	// App shell (HTML, JS, CSS) - cache-first with network update
 	if (url.origin === self.location.origin) {
 		event.respondWith(staleWhileRevalidate(event.request));
 		return;
 	}
 
-	// CDN resources (webllm) — cache-first
+	// CDN resources (webllm) - cache-first
 	if (url.hostname.includes("jsdelivr.net") || url.hostname.includes("esm.sh")) {
 		event.respondWith(cacheFirstModel(event.request));
 		return;

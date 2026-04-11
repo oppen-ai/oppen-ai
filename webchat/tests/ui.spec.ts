@@ -15,7 +15,7 @@ test.describe("UI", () => {
 		await page.locator("#menu-toggle").click();
 		await expect(sidebar).toHaveClass(/open/);
 
-		// Close via backdrop — click the right edge (outside the 320px sidebar)
+		// Close via backdrop - click the right edge (outside the 320px sidebar)
 		await page.locator("#sidebar-backdrop").click({ position: { x: 350, y: 400 } });
 		await expect(sidebar).not.toHaveClass(/open/);
 	});

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Privacy Policy — Öppen AI</title>
+<title>Privacy Policy - Öppen AI</title>
 <meta name="description" content="How Öppen AI handles (and doesn't handle) your data. Our chat runs entirely on your device; this marketing site uses consent-based analytics.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://oppen.ai/privacy.html">
@@ -11,6 +11,9 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css">
+<link rel="stylesheet" href="/cookie-consent.css">
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+<script defer src="/cookie-consent.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
@@ -110,7 +113,7 @@ footer a:hover{color:#fff}
   <p class="updated">Last updated: 11 April 2026</p>
 
   <div class="callout">
-    <p style="margin:0"><strong>The short version:</strong> Öppen AI chat runs entirely in your browser, on your device. Your conversations, prompts, and model inputs never touch our servers — because we don't have any for the chat. This policy covers the small amount of data we do process when you visit this marketing site.</p>
+    <p style="margin:0"><strong>The short version:</strong> Öppen AI chat runs entirely in your browser, on your device. Your conversations, prompts, and model inputs never touch our servers - because we don't have any for the chat. This policy covers the small amount of data we do process when you visit this marketing site.</p>
   </div>
 
   <h2>1. Who we are</h2>
@@ -122,7 +125,7 @@ footer a:hover{color:#fff}
   <ul>
     <li>Your prompts, conversations, and any files you share stay on your device.</li>
     <li>We do not run inference on servers. We have no backend that receives your chat data.</li>
-    <li>We cannot read, log, or train on your conversations — they never leave your machine.</li>
+    <li>We cannot read, log, or train on your conversations - they never leave your machine.</li>
   </ul>
 
   <h2>3. What this marketing site collects</h2>
@@ -138,31 +141,31 @@ footer a:hover{color:#fff}
 
   <h2>4. Cookies we use</h2>
   <ul>
-    <li><strong>cc_cookie</strong> (strictly necessary) — stores your cookie-consent choice so we don't ask again. Set by the consent banner itself. Duration: 6 months.</li>
-    <li><strong>_ga, _ga_*</strong> (analytics, optional) — set by Google Analytics only if you accept. Used to distinguish unique visitors. Duration: up to 13 months.</li>
+    <li><strong>cc_cookie</strong> (strictly necessary) - stores your cookie-consent choice so we don't ask again. Set by the consent banner itself. Duration: 6 months.</li>
+    <li><strong>_ga, _ga_*</strong> (analytics, optional) - set by Google Analytics only if you accept. Used to distinguish unique visitors. Duration: up to 13 months.</li>
   </ul>
 
-  <h2>5. Legal basis (GDPR)</h2>
-  <p>We rely on your <strong>consent</strong> (Art. 6(1)(a) GDPR) for analytics cookies. Strictly necessary cookies (just the consent choice itself) are processed under our legitimate interest in remembering your preference.</p>
+  <h2>5. Legal basis (UK GDPR / EU GDPR)</h2>
+  <p>This site is operated from the United Kingdom. We rely on your <strong>consent</strong> (Art. 6(1)(a) UK GDPR / EU GDPR, and Regulation 6 of the UK Privacy and Electronic Communications Regulations - "PECR") for analytics cookies. Strictly necessary cookies (just the consent choice itself) are processed under our legitimate interest in remembering your preference.</p>
 
   <h2>6. Data retention</h2>
   <p>Google Analytics is configured with a 14-month retention window for user and event data. After that, aggregate data is deleted automatically. We store no analytics data on our own servers.</p>
 
   <h2>7. Third parties</h2>
   <ul>
-    <li><strong>Google (Google Analytics 4)</strong> — analytics provider. See <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</li>
-    <li><strong>Amazon Web Services (S3)</strong> — static hosting for this site. Standard server access logs may include your IP address transiently.</li>
-    <li><strong>jsDelivr</strong> — CDN for the cookie-consent library. Your browser fetches a JS/CSS file from their CDN.</li>
+    <li><strong>Google (Google Analytics 4)</strong> - analytics provider. See <a href="https://policies.google.com/privacy">Google's privacy policy</a>.</li>
+    <li><strong>Amazon Web Services (S3)</strong> - static hosting for this site. Standard server access logs may include your IP address transiently.</li>
+    <li><strong>jsDelivr</strong> - CDN for the cookie-consent library. Your browser fetches a JS/CSS file from their CDN.</li>
   </ul>
 
   <h2>8. Your rights</h2>
-  <p>Under the GDPR and similar laws, you have the right to:</p>
+  <p>Under the UK GDPR, EU GDPR, and similar laws, you have the right to:</p>
   <ul>
     <li>Access the personal data we hold about you</li>
     <li>Request correction or deletion of your data</li>
     <li>Object to or restrict processing</li>
     <li>Withdraw consent at any time (see below)</li>
-    <li>Lodge a complaint with your local data protection authority</li>
+    <li>Lodge a complaint with your local data protection authority - in the UK, the <a href="https://ico.org.uk">Information Commissioner's Office (ICO)</a></li>
   </ul>
   <p>To exercise any of these rights, email <a href="mailto:privacy@oppen.ai">privacy@oppen.ai</a>.</p>
 
@@ -173,77 +176,11 @@ footer a:hover{color:#fff}
   <p>We may update this policy as the project evolves. Material changes will be reflected in the "Last updated" date at the top. For significant changes that affect how we process data, we'll surface a notice on the site.</p>
 </main>
 
+<!-- Footer -->
 <footer>
-  <p>&copy; 2026 Öppen AI &middot; <a href="/">Home</a> &middot; <a href="https://chat.oppen.ai">chat.oppen.ai</a> &middot; <a href="#" onclick="event.preventDefault();if(window.CookieConsent)CookieConsent.showPreferences();">Cookie preferences</a></p>
+  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone<br><a href="/about.html">About</a> | <a href="/privacy.html">Privacy</a> | <a href="/terms.html">Terms</a> | <a href="#" onclick="event.preventDefault();CookieConsent.showPreferences();">Cookies</a></p>
 </footer>
 
-<script defer src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
-<script>
-function loadGA(){
-  if(window.__gaLoaded) return;
-  window.__gaLoaded = true;
-  var s = document.createElement('script');
-  s.async = true;
-  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-RCS50JPQ53';
-  document.head.appendChild(s);
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function(){ dataLayer.push(arguments); };
-  gtag('js', new Date());
-  gtag('config', 'G-RCS50JPQ53', { anonymize_ip: true });
-}
-window.addEventListener('load', function(){
-  if(typeof CookieConsent === 'undefined') return;
-  CookieConsent.run({
-    guiOptions: {
-      consentModal: { layout: 'box inline', position: 'bottom left', equalWeightButtons: true },
-      preferencesModal: { layout: 'box', equalWeightButtons: true }
-    },
-    categories: {
-      necessary: { enabled: true, readOnly: true },
-      analytics: {}
-    },
-    onConsent: function(){
-      if(CookieConsent.acceptedCategory('analytics')) loadGA();
-    },
-    onChange: function(){
-      if(CookieConsent.acceptedCategory('analytics')) loadGA();
-    },
-    language: {
-      default: 'en',
-      translations: {
-        en: {
-          consentModal: {
-            title: 'We respect your privacy',
-            description: 'Our chat runs entirely on your device — we never see your data. On this marketing site we use Google Analytics to understand visitor traffic. No analytics cookies are set unless you accept. <a href="/privacy.html">Privacy policy</a>',
-            acceptAllBtn: 'Accept all',
-            acceptNecessaryBtn: 'Reject all',
-            showPreferencesBtn: 'Manage preferences'
-          },
-          preferencesModal: {
-            title: 'Manage cookie preferences',
-            acceptAllBtn: 'Accept all',
-            acceptNecessaryBtn: 'Reject all',
-            savePreferencesBtn: 'Save preferences',
-            closeIconLabel: 'Close',
-            sections: [
-              {
-                title: 'Strictly necessary',
-                description: 'Required for the site to function. Always enabled.',
-                linkedCategory: 'necessary'
-              },
-              {
-                title: 'Analytics',
-                description: 'Google Analytics 4 — aggregate traffic measurement with IP anonymization. You can opt out at any time.',
-                linkedCategory: 'analytics'
-              }
-            ]
-          }
-        }
-      }
-    }
-  });
-});
-</script>
 
 </body>
 </html>

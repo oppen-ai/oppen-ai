@@ -66,7 +66,7 @@ export async function loadWebLLM(): Promise<boolean> {
 			dlog("info", "webllm", `Loaded successfully from ${url}`);
 			return true;
 		} catch (e) {
-			dlog("error", "webllm", `CDN fail: ${url} — ${(e as Error).message}`);
+			dlog("error", "webllm", `CDN fail: ${url} - ${(e as Error).message}`);
 		}
 	}
 	return false;
@@ -174,9 +174,9 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 			}
 		});
 		await engine.reload(modelId);
-		dlog("info", "engine", "Model loaded successfully — ready to chat");
+		dlog("info", "engine", "Model loaded successfully - ready to chat");
 		callbacks.onReady(engine);
-		showToast("Model loaded — ready to chat");
+		showToast("Model loaded - ready to chat");
 	} catch (e) {
 		const msg = (e as Error).message || String(e);
 		const stack = (e as Error).stack || "";
@@ -195,7 +195,7 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 			lines.push("A browser security policy blocked a required resource.");
 		}
 		if (msg.includes("wasm") || msg.includes("WebAssembly")) {
-			lines.push("WebAssembly failed — this may be a browser compatibility issue.");
+			lines.push("WebAssembly failed - this may be a browser compatibility issue.");
 		}
 		lines.push("", `Detail: ${msg}`);
 		if (stack && stack !== msg) {

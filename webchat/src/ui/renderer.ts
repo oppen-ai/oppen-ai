@@ -136,12 +136,12 @@ export function buildAppShell(): void {
 					<label>Background</label>
 					<select class="input-field select-field" id="bg-select">
 						<option value="none">None</option>
-						<option value="obsidian">Obsidian — metallic silver</option>
-						<option value="spark">Spark — neon green</option>
-						<option value="flux">Flux — purple haze</option>
-						<option value="pulse">Pulse — ocean blue</option>
-						<option value="drift">Drift — aurora</option>
-						<option value="nova">Nova — nebula</option>
+						<option value="obsidian">Obsidian - metallic silver</option>
+						<option value="spark">Spark - neon green</option>
+						<option value="flux">Flux - purple haze</option>
+						<option value="pulse">Pulse - ocean blue</option>
+						<option value="drift">Drift - aurora</option>
+						<option value="nova">Nova - nebula</option>
 					</select>
 				</div>
 				<div class="form-group">

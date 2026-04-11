@@ -50,7 +50,7 @@ async function init(): Promise<void> {
 
 		// 2. Load settings
 		await loadSettings();
-		dlog("info", "init", `Settings loaded — model: ${state.modelId}, debug: ${state.debug}`);
+		dlog("info", "init", `Settings loaded - model: ${state.modelId}, debug: ${state.debug}`);
 
 		// 3. Apply theme
 		applyTheme(state.theme);
@@ -97,7 +97,7 @@ async function init(): Promise<void> {
 				gpuHint.textContent = "WebGPU available";
 				gpuHint.style.color = "var(--success)";
 			} else {
-				gpuHint.textContent = "WebGPU not available — need Safari 18+ / Chrome 113+";
+				gpuHint.textContent = "WebGPU not available - need Safari 18+ / Chrome 113+";
 				gpuHint.style.color = "var(--danger)";
 			}
 		}

@@ -11,6 +11,7 @@ Private AI chat that runs entirely on your device using WebGPU. No server, no tr
 ## Development
 
 ```bash
+nix develop
 npm install
 npm run dev
 ```
@@ -20,6 +21,9 @@ Open `http://localhost:5173`. The app loads the chat UI immediately, then downlo
 ## Build & Deploy
 
 ```bash
+# Enter nix shell
+nix develop
+
 # Build
 infra/build.sh
 
@@ -78,7 +82,7 @@ cp infra/.env.example .env
 ```
 webchat/
 ├── src/
-│   ├── main.ts          # App entry — init, routing, engine boot
+│   ├── main.ts          # App entry - init, routing, engine boot
 │   ├── types.ts          # TypeScript interfaces
 │   ├── state.ts          # Reactive state + IndexedDB persistence
 │   ├── engine.ts         # WebLLM engine: load, diagnostics, streaming

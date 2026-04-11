@@ -22,7 +22,7 @@
 	opacity: 0;
 }
 
-/* ---- Obsidian — metallic silver ---- */
+/* ---- Obsidian - metallic silver ---- */
 [data-bg="obsidian"] #bg-animated::before {
 	width: 180%;
 	height: 160%;
@@ -54,7 +54,7 @@
 	100% { transform: translate(-12%, -8%) rotate(-20deg); }
 }
 
-/* ---- Spark — neon green ---- */
+/* ---- Spark - neon green ---- */
 [data-bg="spark"] #bg-animated::before {
 	width: 170%;
 	height: 150%;
@@ -86,7 +86,7 @@
 	100% { transform: translate(-10%, -12%) rotate(-25deg); }
 }
 
-/* ---- Flux — purple/magenta gradient ---- */
+/* ---- Flux - purple/magenta gradient ---- */
 [data-bg="flux"] #bg-animated::before {
 	width: 180%;
 	height: 160%;
@@ -118,7 +118,7 @@
 	100% { transform: translate(-15%, -10%) rotate(-18deg); }
 }
 
-/* ---- Pulse — ocean blue ---- */
+/* ---- Pulse - ocean blue ---- */
 [data-bg="pulse"] #bg-animated::before {
 	width: 200%;
 	height: 120%;
@@ -150,7 +150,7 @@
 	100% { transform: translate(-10%, -8%) rotate(-22deg); }
 }
 
-/* ---- Drift — teal + magenta aurora ---- */
+/* ---- Drift - teal + magenta aurora ---- */
 [data-bg="drift"] #bg-animated::before {
 	width: 180%;
 	height: 170%;
@@ -182,7 +182,7 @@
 	100% { transform: translate(-8%, -15%) rotate(-28deg); }
 }
 
-/* ---- Nova — pink + blue nebula ---- */
+/* ---- Nova - pink + blue nebula ---- */
 [data-bg="nova"] #bg-animated::before {
 	width: 190%;
 	height: 160%;
