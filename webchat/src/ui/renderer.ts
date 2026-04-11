@@ -114,6 +114,7 @@ export function buildAppShell(): void {
 				<p id="loading-subtitle"></p>
 				<div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
 				<div class="loading-status" id="loading-status"></div>
+				<p class="loading-notice" id="loading-notice">Early preview - expect mistakes</p>
 				<div class="loading-actions" id="loading-actions">
 					<button class="btn" id="loading-change-model">Change Model</button>
 					<button class="btn btn-primary" id="loading-retry">Retry</button>

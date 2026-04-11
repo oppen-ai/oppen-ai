@@ -156,6 +156,15 @@ section{padding:120px 32px;max-width:1200px;margin:0 auto}
   font-weight:600;
 }
 
+/* Early-preview notice shown below the hero CTA buttons - plain white text */
+.preview-pill{
+  display:inline-block;
+  margin-top:24px;
+  font-size:12px;font-weight:500;letter-spacing:.04em;
+  color:rgba(255,255,255,.7);
+}
+
+
 /* ── Animated O Logo (25% bigger: 175px) ── */
 .hero-logo{
   position:relative;width:140px;height:140px;margin-bottom:48px;cursor:pointer;
@@ -357,6 +366,12 @@ section{padding:120px 32px;max-width:1200px;margin:0 auto}
 }
 .feature-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
 .feature-card p{font-size:14px;color:rgba(226,226,240,.5);line-height:1.7}
+/* Wide card spans all columns of the feature grid on desktop */
+.feature-card--wide{grid-column:1 / -1}
+.feature-card--wide .feature-icon{
+  background:rgba(251,191,36,.12);
+  border:1px solid rgba(251,191,36,.4);
+}
 
 /* ── App Showcase ── */
 .showcase{text-align:center;position:relative}
@@ -509,6 +524,7 @@ footer a:hover{color:#fff}
       Learn more
     </a>
   </div>
+  <span class="preview-pill">Early preview - small models, expect mistakes</span>
 </section>
 
 <!-- Features -->
@@ -547,6 +563,11 @@ footer a:hover{color:#fff}
       <div class="feature-icon">&#128171;</div>
       <h3>Runs Locally</h3>
       <p>AI models run directly on your device. Supports Llama, Qwen, SmolLM, and other open source models.</p>
+    </div>
+    <div class="feature-card feature-card--wide reveal">
+      <div class="feature-icon">&#9888;&#65039;</div>
+      <h3>Early preview - expect mistakes</h3>
+      <p>Öppen AI is in early development. The chat runs small language models that fit in your browser - a few hundred MB, orders of magnitude smaller than hosted frontier models. They are good for quick questions and experiments, but they will hallucinate, get facts wrong, and struggle with long or complex conversations. Treat responses as a starting point, not a source of truth.</p>
     </div>
   </div>
 </section>

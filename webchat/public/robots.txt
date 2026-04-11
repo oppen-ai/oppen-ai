@@ -1,0 +1,4 @@
+# chat.oppen.ai - block all indexing. Only the landing page at
+# oppen.ai / www.oppen.ai should be indexed.
+User-agent: *
+Disallow: /

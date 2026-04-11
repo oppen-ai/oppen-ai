@@ -126,6 +126,35 @@ aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \
     --content-type "text/html" \
     --delete
 
+# JS: short cache so we can iterate without 1-year immutable lockin
+echo "  Uploading JS..."
+aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \
+    --region "$AWS_REGION" \
+    --exclude "*" --include "*.js" \
+    --cache-control "max-age=300" \
+    --content-type "application/javascript"
+
+# CSS: short cache
+echo "  Uploading CSS..."
+aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \
+    --region "$AWS_REGION" \
+    --exclude "*" --include "*.css" \
+    --cache-control "max-age=300" \
+    --content-type "text/css"
+
+# robots.txt / sitemap.xml: no-cache so they always reflect the latest deploy
+echo "  Uploading robots.txt / sitemap.xml..."
+aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \
+    --region "$AWS_REGION" \
+    --exclude "*" --include "robots.txt" \
+    --cache-control "no-cache" \
+    --content-type "text/plain"
+aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \
+    --region "$AWS_REGION" \
+    --exclude "*" --include "*.xml" \
+    --cache-control "no-cache" \
+    --content-type "application/xml"
+
 # Images: 1 day cache
 echo "  Uploading images..."
 aws s3 sync "$ARTIFACT_PATH" "s3://$S3_BUCKET" \

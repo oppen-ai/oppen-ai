@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oppen.ai/sitemap.xml

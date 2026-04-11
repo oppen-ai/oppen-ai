@@ -195,6 +195,17 @@
 	overflow-y: auto;
 }
 
+.loading-card .loading-notice {
+	/* Compact early-preview disclaimer kept visible while the model loads. */
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--text-tertiary);
+	letter-spacing: 0.04em;
+	margin-top: 16px;
+	margin-bottom: 0;
+	opacity: 0.8;
+}
+
 .loading-actions {
 	display: none;
 	margin-top: 16px;

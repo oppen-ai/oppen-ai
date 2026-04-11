@@ -79,4 +79,14 @@ test.describe("Loading Overlay", () => {
 		);
 		expect(width === "0%" || width === "").toBe(true);
 	});
+
+	test("loading overlay shows early preview notice", async ({ page }) => {
+		await page.goto("/");
+
+		const notice = page.locator("#loading-notice");
+		await expect(notice).toBeAttached();
+		const text = await notice.textContent();
+		expect(text).toContain("Early preview");
+		expect(text).toContain("expect mistakes");
+	});
 });
