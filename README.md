@@ -1,8 +1,8 @@
 # Öppen AI
 
-Truly open, private AI chat that runs entirely on your device. No servers, no cloud, no accounts - just private, intelligent conversation powered by on-device LLMs.
+Truly open, private AI chat that runs entirely on your device. No servers, no cloud, no accounts - just private conversation powered by on-device LLMs.
 
-* Phase 1: First implementation is provided as a web-based static HML page using WebGPU (limited memory up to 500 MB)
+* Phase 1: First implementation is provided as a web-based static HTML page using WebGPU
 * Phase 2: iPhone app
 
 ## Supported Devices
@@ -18,7 +18,7 @@ Truly open, private AI chat that runs entirely on your device. No servers, no cl
 
 ```bash
 cd website
-npx serve -s website -l 8878
+npx serve -s . -l 8878
 ```
 
 ### Chat App

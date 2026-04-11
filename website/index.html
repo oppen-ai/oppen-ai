@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google Analytics — loaded only after user grants consent below -->
+<script>
+function loadGA(){
+  if(window.__gaLoaded) return;
+  window.__gaLoaded = true;
+  var s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=G-RCS50JPQ53';
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', 'G-RCS50JPQ53', { anonymize_ip: true });
+}
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.css">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Öppen AI - Truly Open, Private AI Chat Running On Your Device</title>
@@ -631,7 +647,7 @@ footer a:hover{color:#fff}
 
 <!-- Footer -->
 <footer>
-  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone &middot; <a href="https://chat.oppen.ai">chat.oppen.ai</a></p>
+  <p>&copy; 2026 Öppen AI &middot; Private AI for everyone &middot; <a href="https://chat.oppen.ai">chat.oppen.ai</a> &middot; <a href="/privacy.html">Privacy policy</a> &middot; <a href="#" onclick="event.preventDefault();CookieConsent.showPreferences();">Cookie preferences</a></p>
 </footer>
 
 <script>
@@ -742,6 +758,63 @@ window.addEventListener('scroll',()=>{
   nav.style.transition='transform .3s ease';
   lastScroll=st;
 },{ passive:true });
+</script>
+
+<!-- Cookie consent (GDPR) -->
+<script defer src="https://cdn.jsdelivr.net/npm/vanilla-cookieconsent@3/dist/cookieconsent.umd.js"></script>
+<script>
+window.addEventListener('load', function(){
+  if(typeof CookieConsent === 'undefined') return;
+  CookieConsent.run({
+    guiOptions: {
+      consentModal: { layout: 'box inline', position: 'bottom left', equalWeightButtons: true },
+      preferencesModal: { layout: 'box', equalWeightButtons: true }
+    },
+    categories: {
+      necessary: { enabled: true, readOnly: true },
+      analytics: {}
+    },
+    onConsent: function(){
+      if(CookieConsent.acceptedCategory('analytics')) loadGA();
+    },
+    onChange: function(){
+      if(CookieConsent.acceptedCategory('analytics')) loadGA();
+    },
+    language: {
+      default: 'en',
+      translations: {
+        en: {
+          consentModal: {
+            title: 'We respect your privacy',
+            description: 'Our chat runs entirely on your device — we never see your data. On this marketing site we use Google Analytics to understand visitor traffic. No analytics cookies are set unless you accept. <a href="/privacy.html">Privacy policy</a>',
+            acceptAllBtn: 'Accept all',
+            acceptNecessaryBtn: 'Reject all',
+            showPreferencesBtn: 'Manage preferences'
+          },
+          preferencesModal: {
+            title: 'Manage cookie preferences',
+            acceptAllBtn: 'Accept all',
+            acceptNecessaryBtn: 'Reject all',
+            savePreferencesBtn: 'Save preferences',
+            closeIconLabel: 'Close',
+            sections: [
+              {
+                title: 'Strictly necessary',
+                description: 'Required for the site to function. Always enabled.',
+                linkedCategory: 'necessary'
+              },
+              {
+                title: 'Analytics',
+                description: 'Google Analytics 4 — aggregate traffic measurement with IP anonymization. You can opt out at any time.',
+                linkedCategory: 'analytics'
+              }
+            ]
+          }
+        }
+      }
+    }
+  });
+});
 </script>
 
 </body>
