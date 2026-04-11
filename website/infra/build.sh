@@ -40,6 +40,11 @@ if [ -d "$APP_DIR/img" ]; then
     cp -r "$APP_DIR/img" "$ARTIFACT_DIR/"
 fi
 
+# Copy vendored third-party libraries (self-hosted cookie consent, etc.)
+if [ -d "$APP_DIR/vendor" ]; then
+    cp -r "$APP_DIR/vendor" "$ARTIFACT_DIR/"
+fi
+
 # Print summary
 echo ""
 echo "=== Build Complete ==="

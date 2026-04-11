@@ -1,5 +1,7 @@
 # Öppen AI
 
+![Öppen AI — Truly Open, Private AI on Your Device](website/img/repository-open-graph.png)
+
 Truly open, private AI chat that runs entirely on your device. No servers, no cloud, no accounts - just private conversation powered by on-device LLMs.
 
 * Phase 1: First implementation is provided as a web-based static HTML page using WebGPU
@@ -124,6 +126,18 @@ node scripts/generate-icons.mjs
 ```
 
 Output: `public/icons/`, `public/favicon.ico`, `public/favicon.svg`
+
+### Generate GitHub repo social preview (OG image)
+
+Renders a 1280x640 PNG matching the site palette for GitHub's repo "Social preview" (Settings → General → Social preview) and for the image shown at the top of this README. Follows the 40pt safe-zone guideline from `website/img/repository-open-graph-template.png`.
+
+```bash
+nix develop
+cd webchat
+node scripts/generate-repo-og-image.mjs
+```
+
+Output: `website/img/repository-open-graph.png`
 
 ## Build & Deploy
 
