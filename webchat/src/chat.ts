@@ -1,8 +1,9 @@
-import { SUMMARIZE_THRESHOLD, summarizeText } from "./documents";
+import { dlog } from "./debug";
+import { summarizeForContext } from "./documents";
 import { streamChat } from "./engine";
 import { sanitizeMarkdown } from "./security";
 import { currentChat, deleteChat, generateId, saveChat, state } from "./state";
-import { applyTokenBudget } from "./token-budget";
+import { applyTokenBudget, estimateTokens } from "./token-budget";
 import type { Chat, Message } from "./types";
 import { renderChatList, renderMessages, scrollToBottom } from "./ui/renderer";
 import { showToast } from "./ui/toast";
@@ -50,7 +51,12 @@ function buildContext(chat: Chat): { role: string; content: string }[] {
 	for (const m of chat.messages.slice(-20)) {
 		msgs.push({ role: m.role, content: m.content });
 	}
-	return applyTokenBudget(msgs);
+	const totalBefore = msgs.reduce((s, m) => s + estimateTokens(m.content), 0);
+	dlog("info", "context", `Before budget: ${msgs.length} msgs, ~${totalBefore} tokens`);
+	const result = applyTokenBudget(msgs);
+	const totalAfter = result.reduce((s, m) => s + estimateTokens(m.content), 0);
+	dlog("info", "context", `After budget: ${result.length} msgs, ~${totalAfter} tokens (budget cut ${msgs.length - result.length} msgs, ${totalBefore - totalAfter} tokens)`);
+	return result;
 }
 
 export async function sendMessage(text: string): Promise<void> {
@@ -67,22 +73,17 @@ export async function sendMessage(text: string): Promise<void> {
 	// Prepend attachment text if present
 	let messageContent = text;
 	if (state.pendingAttachment) {
-		let attachText = state.pendingAttachment.text;
+		const rawText = state.pendingAttachment.text;
+		dlog("info", "attach", `Raw attachment: ${rawText.length} chars (~${estimateTokens(rawText)} tokens) from "${state.pendingAttachment.name}"`);
 
-		if (attachText.length > SUMMARIZE_THRESHOLD) {
-			try {
-				attachText = await summarizeText(attachText);
-			} catch {
-				// Fall back to truncation if summarization fails
-				attachText = attachText.length > 8000
-					? `${attachText.slice(0, 8000)}\n... (truncated)`
-					: attachText;
-			}
-		}
+		const attachText = await summarizeForContext(rawText);
+		dlog("info", "attach", `After summarizeForContext: ${attachText.length} chars (~${estimateTokens(attachText)} tokens)`);
+		dlog("debug", "attach", `Attachment content (first 500 chars): ${attachText.slice(0, 500)}`);
 
 		messageContent = `[Attached document: ${state.pendingAttachment.name}]\n---\n${attachText}\n---\n\n${text}`;
+		dlog("info", "attach", `Final messageContent: ${messageContent.length} chars (~${estimateTokens(messageContent)} tokens)`);
+
 		state.pendingAttachment = null;
-		// Clear attachment chip
 		const area = document.getElementById("attachment-area");
 		if (area) area.innerHTML = "";
 	}
@@ -119,6 +120,12 @@ export async function sendMessage(text: string): Promise<void> {
 		const context = buildContext(chat);
 		// Remove the empty assistant message from context (it was added for display)
 		context.pop();
+
+		dlog("info", "context", `Sending ${context.length} messages to LLM`);
+		for (let i = 0; i < context.length; i++) {
+			const m = context[i];
+			dlog("debug", "context", `  [${i}] ${m.role}: ${m.content.length} chars - "${m.content.slice(0, 120)}..."`);
+		}
 
 		await streamChat(state.engine, context, (fullText) => {
 			assistantMsg.content = fullText;

@@ -75,16 +75,24 @@ function initActionButtons(): void {
 }
 
 async function handleFileUpload(input: HTMLInputElement): Promise<void> {
+	const { dlog } = await import("../debug");
 	const file = input.files?.[0];
 	if (!file) return;
+
+	dlog("info", "upload", `File selected: ${file.name} (${file.type}, ${file.size} bytes)`);
 
 	// Reset input so the same file can be re-selected
 	input.value = "";
 
 	const result = await processDocument(file);
+	dlog("info", "upload", `processDocument returned: ${result.text.length} chars`);
+	if (result.text) {
+		dlog("debug", "upload", `Extracted text: "${result.text.slice(0, 200)}"`);
+	}
 	if (!result.text) return;
 
 	state.pendingAttachment = { name: file.name, text: result.text };
+	dlog("info", "upload", `Attachment set: "${file.name}" (${result.text.length} chars). Type a message to send it.`);
 	renderAttachmentChip();
 }
 

@@ -10,16 +10,30 @@ export interface ModelInfo {
 	label: string;
 	vramMB: number;
 	mobileSafe: boolean;
+	contextWindow: number;
 }
 
+export const CONTEXT_OPTIONS = [1024, 2048, 4096] as const;
+export type ContextSize = (typeof CONTEXT_OPTIONS)[number];
+
 export const MODELS: ModelInfo[] = [
-	{ id: "SmolLM2-135M-Instruct-q0f32-MLC", label: "SmolLM2 135M", vramMB: 270, mobileSafe: true },
-	{ id: "Qwen2.5-0.5B-Instruct-q4f32_1-MLC", label: "Qwen2.5 0.5B", vramMB: 500, mobileSafe: true },
-	{ id: "SmolLM2-360M-Instruct-q4f16_1-MLC", label: "SmolLM2 360M (f16)", vramMB: 360, mobileSafe: true },
-	{ id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B (f16)", vramMB: 400, mobileSafe: true },
-	{ id: "Llama-3.2-1B-Instruct-q4f32_1-MLC", label: "Llama 3.2 1B", vramMB: 1100, mobileSafe: false },
-	{ id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", label: "SmolLM2 1.7B (f16)", vramMB: 1400, mobileSafe: false },
-	{ id: "Qwen2.5-1.5B-Instruct-q4f32_1-MLC", label: "Qwen2.5 1.5B", vramMB: 1800, mobileSafe: false },
+	// Mobile-safe (< 600 MB VRAM)
+	{ id: "SmolLM2-135M-Instruct-q0f32-MLC", label: "SmolLM2 135M", vramMB: 270, mobileSafe: true, contextWindow: 4096 },
+	{ id: "SmolLM2-360M-Instruct-q4f16_1-MLC", label: "SmolLM2 360M", vramMB: 376, mobileSafe: true, contextWindow: 4096 },
+	{ id: "SmolLM2-360M-Instruct-q4f32_1-MLC", label: "SmolLM2 360M (f32)", vramMB: 580, mobileSafe: true, contextWindow: 4096 },
+	{ id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B", vramMB: 400, mobileSafe: true, contextWindow: 4096 },
+	{ id: "Qwen2.5-0.5B-Instruct-q4f32_1-MLC", label: "Qwen2.5 0.5B (f32)", vramMB: 500, mobileSafe: true, contextWindow: 4096 },
+	// Desktop - medium (1-2 GB)
+	{ id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B", vramMB: 879, mobileSafe: false, contextWindow: 4096 },
+	{ id: "Llama-3.2-1B-Instruct-q4f32_1-MLC", label: "Llama 3.2 1B (f32)", vramMB: 1129, mobileSafe: false, contextWindow: 4096 },
+	{ id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", label: "SmolLM2 1.7B", vramMB: 1774, mobileSafe: false, contextWindow: 4096 },
+	{ id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B", vramMB: 1630, mobileSafe: false, contextWindow: 4096 },
+	{ id: "Qwen2.5-1.5B-Instruct-q4f32_1-MLC", label: "Qwen2.5 1.5B (f32)", vramMB: 1889, mobileSafe: false, contextWindow: 4096 },
+	// Desktop - large (2-3 GB)
+	{ id: "Llama-3.2-3B-Instruct-q4f16_1-MLC", label: "Llama 3.2 3B", vramMB: 2264, mobileSafe: false, contextWindow: 4096 },
+	{ id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", label: "Qwen2.5 3B", vramMB: 2505, mobileSafe: false, contextWindow: 4096 },
+	// Desktop - extra large (5+ GB)
+	{ id: "Qwen2.5-7B-Instruct-q4f16_1-MLC", label: "Qwen2.5 7B", vramMB: 5107, mobileSafe: false, contextWindow: 4096 },
 ];
 
 let detectedMobile = false;

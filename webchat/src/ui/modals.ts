@@ -1,6 +1,6 @@
 import { createNewChat } from "../chat";
 import { setDebugEnabled } from "../debug";
-import { MODELS, type ModelInfo, initEngine, isMobileDevice } from "../engine";
+import { CONTEXT_OPTIONS, MODELS, initEngine, isMobileDevice } from "../engine";
 import {
 	clearHash,
 	createEncryptedMemory,
@@ -8,7 +8,9 @@ import {
 	loadEncryptedMemory,
 } from "../memory";
 import { saveSettings, state } from "../state";
-import { applyBgTheme, nextPreset, prevPreset, setTheme, shufflePreset } from "../theme";
+import { applyBgTheme, setTheme, setThemePreset } from "../theme";
+import { getPresetLabel } from "../themes/engine";
+import { PRESET_IDS } from "../themes/presets";
 import type { AppState, MLCEngine } from "../types";
 import {
 	hideLoadingOverlay,
@@ -26,9 +28,8 @@ export function initModals(): void {
 	initPasswordModal();
 	initBackdropClose();
 	initNewChatButton();
-	initModelBadgeClick();
 	initSidebarButtons();
-	initThemePicker();
+	initTopbarModelSelect();
 }
 
 function initSidebarButtons(): void {
@@ -48,11 +49,6 @@ function initNewChatButton(): void {
 	});
 }
 
-function initModelBadgeClick(): void {
-	const badge = document.getElementById("model-badge");
-	badge?.addEventListener("click", () => openSettingsModal());
-}
-
 function initSettingsModal(): void {
 	const cancelBtn = document.getElementById("settings-cancel");
 	const saveBtn = document.getElementById("settings-save");
@@ -61,11 +57,6 @@ function initSettingsModal(): void {
 	saveBtn?.addEventListener("click", handleSaveSettings);
 }
 
-function initThemePicker(): void {
-	document.getElementById("theme-prev")?.addEventListener("click", () => prevPreset());
-	document.getElementById("theme-next")?.addEventListener("click", () => nextPreset());
-	document.getElementById("theme-shuffle")?.addEventListener("click", () => shufflePreset());
-}
 
 export function openSettingsModal(): void {
 	const themeSelect = document.getElementById("theme-select") as HTMLSelectElement | null;
@@ -75,9 +66,20 @@ export function openSettingsModal(): void {
 	const debugToggle = document.getElementById("debug-toggle-setting") as HTMLInputElement | null;
 	const voiceEngineSelect = document.getElementById("voice-engine-select") as HTMLSelectElement | null;
 
+	const presetSelect = document.getElementById("preset-select") as HTMLSelectElement | null;
+
 	if (themeSelect) themeSelect.value = state.theme;
+	if (presetSelect) {
+		presetSelect.innerHTML = PRESET_IDS.map(
+			(id) => `<option value="${id}">${getPresetLabel(id)}</option>`,
+		).join("");
+		presetSelect.value = state.themePreset;
+	}
 	if (bgSelect) bgSelect.value = state.bgTheme;
-	if (modelSelect) populateModels(modelSelect);
+	if (modelSelect) populateModels(modelSelect, false);
+
+	const contextSelect = document.getElementById("context-select") as HTMLSelectElement | null;
+	if (contextSelect) populateContextOptions(contextSelect);
 	if (sysPrompt) sysPrompt.value = state.systemPrompt;
 	if (debugToggle) debugToggle.checked = state.debug;
 	if (voiceEngineSelect) voiceEngineSelect.value = state.voiceEngine;
@@ -85,21 +87,96 @@ export function openSettingsModal(): void {
 	openModal("settings-modal");
 }
 
-function modelOptionLabel(m: ModelInfo): string {
-	const mobile = isMobileDevice();
-	const vram = m.vramMB >= 1000 ? `${(m.vramMB / 1000).toFixed(1)}GB` : `${m.vramMB}MB`;
-	let suffix = "";
-	if (mobile && !m.mobileSafe) {
-		suffix = " \u26a0\ufe0f may crash";
-	}
-	return `${m.label} (~${vram})${suffix}`;
+function formatVram(mb: number): string {
+	return mb >= 1000 ? `${(mb / 1000).toFixed(1)}GB` : `${mb}MB`;
 }
 
-function populateModels(select: HTMLSelectElement): void {
-	select.innerHTML = MODELS.map(
-		(m) =>
-			`<option value="${m.id}"${m.id === state.modelId ? " selected" : ""}>${modelOptionLabel(m)}</option>`,
-	).join("");
+function populateModels(select: HTMLSelectElement, filterForDevice = false): void {
+	const mobile = isMobileDevice();
+	const models = filterForDevice && mobile ? MODELS.filter((m) => m.mobileSafe) : MODELS;
+	select.innerHTML = models
+		.map((m) => {
+			let label = `${m.label} (~${formatVram(m.vramMB)})`;
+			if (!filterForDevice && mobile && !m.mobileSafe) {
+				label += " - not supported on this device";
+			}
+			return `<option value="${m.id}"${m.id === state.modelId ? " selected" : ""}>${label}</option>`;
+		})
+		.join("");
+}
+
+function populateContextOptions(select: HTMLSelectElement): void {
+	const model = MODELS.find((m) => m.id === state.modelId);
+	const maxCtx = model?.contextWindow ?? 4096;
+	select.innerHTML = CONTEXT_OPTIONS.filter((s) => s <= maxCtx)
+		.map(
+			(s) =>
+				`<option value="${s}"${s === state.contextSize ? " selected" : ""}>${s} tokens (~${Math.round((s * 0.75))} words)</option>`,
+		)
+		.join("");
+}
+
+function renderModelDropdown(): void {
+	const dropdown = document.getElementById("model-dropdown");
+	if (!dropdown) return;
+	const mobile = isMobileDevice();
+	const models = mobile ? MODELS.filter((m) => m.mobileSafe) : MODELS;
+	dropdown.innerHTML = models
+		.map((m) => {
+			const active = m.id === state.modelId;
+			return `<button class="model-dropdown-item${active ? " active" : ""}" data-model-id="${m.id}">
+				<span class="model-dropdown-item-dot ${active ? "active" : "inactive"}"></span>
+				<span class="model-dropdown-item-info">
+					<span class="model-dropdown-item-name">${m.label}</span>
+					<span class="model-dropdown-item-meta">${formatVram(m.vramMB)} VRAM</span>
+				</span>
+			</button>`;
+		})
+		.join("");
+}
+
+function updateBadgeLabel(): void {
+	const label = document.getElementById("model-badge-label");
+	if (label) {
+		const model = MODELS.find((m) => m.id === state.modelId);
+		label.textContent = model?.label ?? "select model";
+	}
+}
+
+function initTopbarModelSelect(): void {
+	const badge = document.getElementById("model-badge");
+	const dropdown = document.getElementById("model-dropdown");
+	if (!badge || !dropdown) return;
+
+	renderModelDropdown();
+	updateBadgeLabel();
+
+	badge.addEventListener("click", (e) => {
+		e.stopPropagation();
+		const isOpen = dropdown.classList.toggle("open");
+		badge.classList.toggle("open", isOpen);
+		if (isOpen) renderModelDropdown();
+	});
+
+	dropdown.addEventListener("click", (e) => {
+		const item = (e.target as HTMLElement).closest("[data-model-id]") as HTMLElement | null;
+		if (!item) return;
+		const newId = item.dataset.modelId || "";
+		dropdown.classList.remove("open");
+		badge.classList.remove("open");
+		if (newId === state.modelId) return;
+		state.modelId = newId;
+		state.ready = false;
+		state.engine = null;
+		updateBadgeLabel();
+		saveSettings();
+		startEngineLoad();
+	});
+
+	document.addEventListener("click", () => {
+		dropdown.classList.remove("open");
+		badge.classList.remove("open");
+	});
 }
 
 async function handleSaveSettings(): Promise<void> {
@@ -109,11 +186,19 @@ async function handleSaveSettings(): Promise<void> {
 
 	if (themeSelect) setTheme(themeSelect.value as AppState["theme"]);
 
+	const presetSelect = document.getElementById("preset-select") as HTMLSelectElement | null;
+	if (presetSelect && presetSelect.value !== state.themePreset) {
+		setThemePreset(presetSelect.value);
+	}
+
 	const bgSelect = document.getElementById("bg-select") as HTMLSelectElement | null;
 	if (bgSelect) {
 		state.bgTheme = bgSelect.value as AppState["bgTheme"];
 		applyBgTheme(state.bgTheme);
 	}
+
+	const contextSelect = document.getElementById("context-select") as HTMLSelectElement | null;
+	if (contextSelect) state.contextSize = Number(contextSelect.value) || 4096;
 
 	if (sysPrompt) state.systemPrompt = sysPrompt.value;
 
@@ -278,13 +363,12 @@ export function closeModal(id: string): void {
 
 export function startEngineLoad(): void {
 	const dot = document.getElementById("status-dot");
-	const badge = document.getElementById("model-name-badge");
 
 	const modelLabel =
 		MODELS.find((m) => m.id === state.modelId)?.label ?? state.modelId.split("-").slice(0, 2).join(" ");
 
 	if (dot) dot.className = "dot loading";
-	if (badge) badge.textContent = modelLabel;
+	updateBadgeLabel();
 
 	let isDownloading = false;
 	let titleSet = false;
@@ -327,7 +411,7 @@ export function startEngineLoad(): void {
 		},
 		onDiagnosticError(lines) {
 			if (dot) dot.className = "dot error";
-			if (badge) badge.textContent = "error";
+			updateBadgeLabel();
 			showLoadingError("Something went wrong", lines.join("\n"));
 			showToast(lines[0] || "Error");
 		},
@@ -341,7 +425,7 @@ export function startEngineLoad(): void {
 		},
 		onError(lines) {
 			if (dot) dot.className = "dot error";
-			if (badge) badge.textContent = "error";
+			updateBadgeLabel();
 			showLoadingError("Failed to load model", lines.join("\n"));
 			showToast("Model load failed");
 			setTimeout(() => hideLoadingOverlay(), 8000);

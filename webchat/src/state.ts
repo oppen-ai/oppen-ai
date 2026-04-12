@@ -75,10 +75,11 @@ export const state: AppState = {
 	systemPrompt: "",
 	memory: "",
 	modelId: "Qwen2.5-0.5B-Instruct-q4f32_1-MLC",
+	contextSize: 4096,
 	theme: "dark",
 	bgTheme: "none",
 	themePreset: "mono",
-	voiceEngine: "whisper",
+	voiceEngine: "webspeech",
 	pendingAttachment: null,
 	debug: false,
 };
@@ -89,6 +90,8 @@ export async function loadSettings(): Promise<void> {
 		if (t) state.theme = t.value as AppState["theme"];
 		const m = await dbGet<{ key: string; value: string }>("settings", "model");
 		if (m) state.modelId = m.value;
+		const cs = await dbGet<{ key: string; value: string }>("settings", "contextSize");
+		if (cs) state.contextSize = Number(cs.value) || 4096;
 		const p = await dbGet<{ key: string; value: string }>("settings", "systemPrompt");
 		if (p) state.systemPrompt = p.value;
 		const bg = await dbGet<{ key: string; value: string }>("settings", "bgTheme");
@@ -107,6 +110,7 @@ export async function loadSettings(): Promise<void> {
 export async function saveSettings(): Promise<void> {
 	await dbPut("settings", { key: "theme", value: state.theme });
 	await dbPut("settings", { key: "model", value: state.modelId });
+	await dbPut("settings", { key: "contextSize", value: String(state.contextSize) });
 	await dbPut("settings", { key: "systemPrompt", value: state.systemPrompt });
 	await dbPut("settings", { key: "bgTheme", value: state.bgTheme });
 	await dbPut("settings", { key: "themePreset", value: state.themePreset });

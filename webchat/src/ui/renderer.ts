@@ -1,7 +1,7 @@
 import { deleteChatById, switchChat } from "../chat";
 import { sanitize, sanitizeMarkdown } from "../security";
 import { currentChat, state } from "../state";
-import { getPresetLabel } from "../themes/engine";
+
 import { showToast } from "./toast";
 
 const SVG_PLUS =
@@ -37,20 +37,9 @@ const SVG_MIC =
 const SVG_TRASH =
 	'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
 
-const SVG_CHEVRON_LEFT =
-	'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
-
-const SVG_CHEVRON_RIGHT =
-	'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
-
-const SVG_SHUFFLE =
-	'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>';
-
 export function buildAppShell(): void {
 	const app = document.getElementById("app");
 	if (!app) return;
-
-	const presetLabel = getPresetLabel(state.themePreset);
 
 	app.innerHTML = `
 		<div id="bg-animated"></div>
@@ -74,18 +63,14 @@ export function buildAppShell(): void {
 		<main id="main">
 			<header class="topbar">
 				<button class="btn btn-icon" id="menu-toggle">${SVG_MENU}</button>
-				<div class="theme-picker" id="theme-picker">
-					<button class="btn-icon-sm" id="theme-prev" title="Previous theme">${SVG_CHEVRON_LEFT}</button>
-					<button class="theme-name-btn" id="theme-name" title="Current theme">${sanitize(presetLabel)}</button>
-					<button class="btn-icon-sm" id="theme-shuffle" title="Random theme">${SVG_SHUFFLE}</button>
-					<button class="btn-icon-sm" id="theme-next" title="Next theme">${SVG_CHEVRON_RIGHT}</button>
-				</div>
 				<span class="topbar-title" id="topbar-title">New Chat</span>
 				<div id="memory-indicator" style="display:none"></div>
 				<div class="model-badge" id="model-badge">
 					<span class="dot" id="status-dot"></span>
-					<span id="model-name-badge">not loaded</span>
+					<span class="model-badge-label" id="model-badge-label">loading...</span>
+					<svg class="model-badge-chevron" width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
 				</div>
+				<div class="model-dropdown" id="model-dropdown"></div>
 			</header>
 			<div id="messages"><div class="messages-inner" id="messages-inner"></div></div>
 			<div id="input-area">
@@ -134,21 +119,17 @@ export function buildAppShell(): void {
 					</select>
 				</div>
 				<div class="form-group">
-					<label>Background</label>
-					<select class="input-field select-field" id="bg-select">
-						<option value="none">None</option>
-						<option value="obsidian">Obsidian - metallic silver</option>
-						<option value="spark">Spark - neon green</option>
-						<option value="flux">Flux - purple haze</option>
-						<option value="pulse">Pulse - ocean blue</option>
-						<option value="drift">Drift - aurora</option>
-						<option value="nova">Nova - nebula</option>
-					</select>
+					<label>Color Preset</label>
+					<select class="input-field select-field" id="preset-select"></select>
 				</div>
 				<div class="form-group">
 					<label>Model</label>
 					<select class="input-field select-field" id="model-select"></select>
 				</div>
+					<div class="form-group">
+						<label>Context Window</label>
+						<select class="input-field select-field" id="context-select"></select>
+					</div>
 				<div class="form-group">
 					<label>System Prompt</label>
 					<textarea class="input-field" id="system-prompt" rows="3" placeholder="You are a helpful assistant..."></textarea>
@@ -359,7 +340,7 @@ function renderEmptyState(el: HTMLElement): void {
 			</div>
 		</div>
 		<h2>Öppen AI</h2>
-		<p>Private AI running entirely on your device. No data leaves your browser.</p>
+		<p>Early preview - small models, expect mistakes. Runs entirely on your device.</p>
 		<div class="empty-chips">
 			<div class="empty-chip" data-prompt="Explain quantum computing simply">Explain quantum computing</div>
 			<div class="empty-chip" data-prompt="Write a short poem about rain">Write a poem about rain</div>

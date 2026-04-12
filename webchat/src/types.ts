@@ -32,6 +32,7 @@ export interface AppState {
 	systemPrompt: string;
 	memory: string;
 	modelId: string;
+	contextSize: number;
 	theme: "dark" | "light" | "system";
 	bgTheme: "none" | "obsidian" | "spark" | "flux" | "pulse" | "drift" | "nova";
 	themePreset: string;

@@ -12,7 +12,7 @@ test.describe("Voice Input", () => {
 		await page.goto("/");
 
 		// Open settings modal
-		await page.locator("#model-badge").click();
+		await page.locator("#settings-btn").click();
 		await expect(page.locator("#settings-modal")).toHaveClass(/visible/);
 
 		// Check voice engine select

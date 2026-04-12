@@ -34,15 +34,63 @@ infra/deploy.sh prd
 infra/deploy.sh dev --test
 ```
 
-## Icon Generation
+## Scripts
 
-Requires `rsvg-convert` (librsvg) or ImageMagick:
+All scripts live in `scripts/` and use Playwright (Chromium). Run them from inside `nix develop`.
+
+### Generate OG image (website)
+
+Captures the hero section of the landing page at 1200x630 @2x for social media previews.
 
 ```bash
-scripts/generate-icons.sh    # PNG icons (all sizes)
-scripts/generate-favicon.sh  # favicon.ico
-scripts/generate-og.sh       # OG preview image
+node scripts/capture-og-image.mjs                          # auto-serves website/ locally
+node scripts/capture-og-image.mjs --url https://oppen.ai   # from production
 ```
+
+Output: `../website/og-image.png`
+
+### Capture app screenshots
+
+Captures desktop and mobile screenshots of the chat app (home, typing, chat, loading states).
+
+```bash
+node scripts/capture-app-screenshots.mjs                              # from https://chat.oppen.ai
+node scripts/capture-app-screenshots.mjs --url http://localhost:5173  # from local dev
+```
+
+Output: `../website/img/app-*.png`
+
+### Capture website previews
+
+Captures each section of the landing page (hero, features, showcase, etc.).
+
+```bash
+node scripts/capture-website-previews.mjs --url https://oppen.ai
+```
+
+Output: `../.temp/preview-*.png`
+
+### Generate favicons and PWA icons
+
+Renders `src/logo.svg` at all required sizes using Chromium for correct gradient rendering.
+
+```bash
+node scripts/generate-icons.mjs
+```
+
+Output: `public/icons/`, `public/favicon.ico`, `public/favicon.svg`
+
+### Generate GitHub repo social preview
+
+Renders a 1280x640 PNG matching the site palette for GitHub's repo social preview. Follows the 40pt safe-zone guideline from `../website/img/repository-open-graph-template.png`.
+
+```bash
+node scripts/generate-repo-og-image.mjs
+```
+
+Output: `../website/img/repository-open-graph.png`
+
+Upload via GitHub repo Settings - General - Social preview.
 
 ## Tests
 

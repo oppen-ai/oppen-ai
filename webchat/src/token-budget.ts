@@ -1,5 +1,11 @@
-export const MAX_CONTEXT_TOKENS = 1800;
+import { state } from "./state";
+
+const GENERATION_RESERVE = 1024;
 const TRUNCATION_MARKER = "\n... (truncated to fit context)";
+
+export function getMaxContextTokens(): number {
+	return Math.max(512, state.contextSize - GENERATION_RESERVE);
+}
 
 export function estimateTokens(text: string): number {
 	return Math.ceil(text.length / 4);
@@ -10,8 +16,9 @@ export function applyTokenBudget(
 ): { role: string; content: string }[] {
 	if (messages.length === 0) return messages;
 
+	const maxTokens = getMaxContextTokens();
 	const totalTokens = messages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
-	if (totalTokens <= MAX_CONTEXT_TOKENS) return messages;
+	if (totalTokens <= maxTokens) return messages;
 
 	// System prompt is always first and always preserved
 	const system = messages[0]?.role === "system" ? messages[0] : null;
@@ -21,7 +28,7 @@ export function applyTokenBudget(
 	const lastMsg = rest.length > 0 ? rest[rest.length - 1] : null;
 	const middle = rest.length > 1 ? rest.slice(0, -1) : [];
 
-	let budget = MAX_CONTEXT_TOKENS;
+	let budget = maxTokens;
 
 	// Reserve space for system prompt
 	if (system) {

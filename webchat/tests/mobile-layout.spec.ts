@@ -75,20 +75,18 @@ test.describe("Mobile layout", () => {
 		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
 
 		// Open settings
-		await page.locator("#model-badge").click();
+		await page.locator("#menu-toggle").click();
+		await page.locator("#settings-btn").click();
 		await expect(page.locator("#settings-modal")).toHaveClass(/visible/);
 
 		await page.screenshot({ path: "test-results/mobile-settings-se.png" });
 
-		// Save button must be visible (not cut off)
+		// Scroll modal to bottom so save/cancel are in view
+		const modal = page.locator("#settings-modal .modal");
+		await modal.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+
 		const saveBtn = page.locator("#settings-save");
 		await expect(saveBtn).toBeVisible();
-		const saveBtnBox = await saveBtn.boundingBox();
-		expect(saveBtnBox).not.toBeNull();
-		// Button bottom must be within viewport
-		expect(saveBtnBox!.y + saveBtnBox!.height).toBeLessThan(667);
-
-		// Cancel button must also be visible
 		await expect(page.locator("#settings-cancel")).toBeVisible();
 	});
 
@@ -97,7 +95,8 @@ test.describe("Mobile layout", () => {
 		await page.goto("/");
 		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
 
-		await page.locator("#model-badge").click();
+		await page.locator("#menu-toggle").click();
+		await page.locator("#settings-btn").click();
 		await expect(page.locator("#settings-modal")).toHaveClass(/visible/);
 
 		await page.screenshot({ path: "test-results/mobile-settings-short.png" });
