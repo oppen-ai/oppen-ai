@@ -42,6 +42,11 @@ if [ -d "$APP_DIR/img" ]; then
     cp -r "$APP_DIR/img" "$ARTIFACT_DIR/"
 fi
 
+# Copy icons directory (apple-touch-icon, 192px, 512px PNGs for search results)
+if [ -d "$APP_DIR/icons" ]; then
+    cp -r "$APP_DIR/icons" "$ARTIFACT_DIR/"
+fi
+
 # Copy vendored third-party libraries (self-hosted cookie consent, etc.)
 if [ -d "$APP_DIR/vendor" ]; then
     cp -r "$APP_DIR/vendor" "$ARTIFACT_DIR/"

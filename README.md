@@ -16,11 +16,115 @@ Oppen AI runs large language models directly in your browser using WebGPU and We
 - **Voice input** - speech-to-text via the browser's Web Speech API (default) or on-device Whisper model.
 - **Early preview** - these are small models that will hallucinate, get facts wrong, and struggle with complex conversations. Treat responses as a starting point, not a source of truth.
 
-## Supported Devices
+## Supported Devices and GPUs
 
-- Apple Silicon (Mac, iPhone, iPad)
-- Desktop with WebGPU-capable browser (Chrome 113+, Edge 113+, Safari 18+)
-- Android with WebGPU support (limited)
+Oppen AI requires a browser with **WebGPU** support and a GPU that can run it. WebGPU is the successor to WebGL and provides direct access to the GPU for compute workloads like LLM inference.
+
+### Browsers
+
+| Browser | Platform | WebGPU Status |
+|---|---|---|
+| Chrome 113+ | Windows, macOS, Linux, Android | Enabled by default |
+| Edge 113+ | Windows, macOS | Enabled by default |
+| Safari 18+ | macOS, iOS, iPadOS | Enabled by default |
+| Brave | All | Works but may need `brave://flags/#enable-unsafe-webgpu` on Linux |
+| Firefox | All | Behind flag (`dom.webgpu.enabled` in `about:config`) |
+
+### GPUs
+
+| GPU | Status | Notes |
+|---|---|---|
+| **Apple Silicon** (M1/M2/M3/M4) | Best support | Unified memory, works on Mac + iPhone + iPad |
+| **Apple A15+** (iPhone 13+) | Works | Mobile Safari 18+ required |
+| **NVIDIA GTX 1060+** | Works | Desktop Chrome/Edge, needs up-to-date drivers |
+| **NVIDIA RTX series** | Works | Best desktop performance |
+| **AMD Radeon RX 5000+** | Works | Desktop Chrome/Edge |
+| **AMD RDNA 2/3** | Works | Including Steam Deck |
+| **Intel Iris Xe** (11th gen+) | Works | May need `enable-unsafe-webgpu` flag in Brave |
+| **Intel Arc** (A-series) | Works | Dedicated GPU, good performance |
+| **Intel UHD 600/700** | Limited | Older integrated, may fail on larger models |
+| **Qualcomm Adreno 640+** | Limited | Android Chrome, experimental |
+| **ARM Mali** | Not supported | No WebGPU support yet |
+| **Older NVIDIA (pre-GTX 1060)** | Not supported | Missing required Vulkan features |
+| **Older Intel (pre-11th gen)** | Not supported | No WebGPU adapter available |
+
+### Memory requirements
+
+| Model | VRAM needed | Suitable for |
+|---|---|---|
+| SmolLM2 135M | ~270 MB | Any device, phones |
+| Qwen2.5 0.5B | ~400-500 MB | Phones, tablets |
+| Llama 3.2 1B | ~900-1100 MB | Tablets, laptops |
+| Qwen2.5 1.5B | ~1.6-1.9 GB | Laptops, desktops |
+| Llama 3.2 3B | ~2.3 GB | Desktops, Apple Silicon |
+| Qwen2.5 3B | ~2.5 GB | Desktops, Apple Silicon |
+| Qwen2.5 7B | ~5.1 GB | Desktops with 8GB+ VRAM |
+
+## Troubleshooting
+
+### "WebGPU is not available"
+
+Your browser does not support WebGPU or it is disabled.
+
+- **Chrome/Edge**: update to version 113 or later
+- **Safari**: update to Safari 18 or later
+- **Firefox**: go to `about:config`, search for `dom.webgpu.enabled`, set to `true`
+- **Brave**: go to `brave://flags/#enable-unsafe-webgpu`, set to Enabled, relaunch
+
+### "No available adapters"
+
+WebGPU is available in the browser but it cannot find a usable GPU. This is common on **Linux with Intel integrated GPUs** where the browser does not trust the GPU by default.
+
+**Fix for Brave on Linux:**
+1. Go to `brave://flags/#enable-unsafe-webgpu`
+2. Set to **Enabled**
+3. Relaunch the browser
+
+**Fix for Chrome on Linux (if needed):**
+1. Go to `chrome://flags/#enable-unsafe-webgpu`
+2. Set to **Enabled**
+3. Relaunch
+
+**Check Vulkan drivers (Linux):**
+```bash
+vulkaninfo --summary
+```
+If this fails, install the Vulkan drivers for your GPU:
+```bash
+# Intel
+sudo apt install mesa-vulkan-drivers
+
+# NVIDIA
+sudo apt install nvidia-driver-535  # or latest
+
+# AMD
+sudo apt install mesa-vulkan-drivers
+```
+
+### "Cannot reach model server"
+
+The browser cannot connect to HuggingFace to download model weights.
+
+- Check your internet connection
+- Disable ad blockers or VPN for `chat.oppen.ai`
+- On Safari: Settings - Privacy - disable "Prevent cross-site tracking" for this site
+- Corporate firewalls may block `huggingface.co` - ask your IT team
+
+### "Not enough GPU memory" / page crashes
+
+The selected model is too large for your device.
+
+- Switch to a smaller model in the top-right dropdown
+- On mobile: use SmolLM2 135M or Qwen2.5 0.5B (under 500 MB)
+- Close other GPU-intensive tabs (video, games, other AI tools)
+
+### Service worker cache errors
+
+If you see `Failed to execute 'put' on 'Cache'` in the console:
+
+- Clear site data: browser Settings - Privacy - Site data - clear for `chat.oppen.ai`
+- Unregister the service worker: DevTools (F12) - Application - Service Workers - Unregister
+- Reload the page
 
 ## Toolchain (Nix flake)
 

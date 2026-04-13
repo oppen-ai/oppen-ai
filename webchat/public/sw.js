@@ -44,6 +44,11 @@ self.addEventListener("fetch", (event) => {
 });
 
 async function cacheFirstModel(request) {
+	// Cache API only supports GET requests - skip HEAD/POST/etc.
+	if (request.method !== "GET") {
+		return fetch(request);
+	}
+
 	const cache = await caches.open(MODEL_CACHE);
 	const cached = await cache.match(request);
 	if (cached) return cached;
