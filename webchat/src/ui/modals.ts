@@ -1,12 +1,14 @@
 import { createNewChat } from "../chat";
 import { setDebugEnabled } from "../debug";
-import { CONTEXT_OPTIONS, MODELS, initEngine, isMobileDevice } from "../engine";
+import { CONTEXT_OPTIONS, MODELS, initEngine, isMobileDevice, isQrngPerTokenActive } from "../engine";
 import {
 	clearHash,
 	createEncryptedMemory,
 	decryptHashMemory,
+	getActiveMemory,
 	loadEncryptedMemory,
 } from "../memory";
+import { configureQrng, getQrngStatus } from "../qrng";
 import { saveSettings, state } from "../state";
 import { applyBgTheme, setTheme, setThemePreset } from "../theme";
 import { getPresetLabel } from "../themes/engine";
@@ -84,7 +86,27 @@ export function openSettingsModal(): void {
 	if (debugToggle) debugToggle.checked = state.debug;
 	if (voiceEngineSelect) voiceEngineSelect.value = state.voiceEngine;
 
+	const qrngEnabled = document.getElementById("qrng-enabled") as HTMLInputElement | null;
+	const qrngMode = document.getElementById("qrng-mode") as HTMLSelectElement | null;
+	const qrngProxyUrl = document.getElementById("qrng-proxy-url") as HTMLInputElement | null;
+	const qrngStatusLine = document.getElementById("qrng-status-line");
+	if (qrngEnabled) qrngEnabled.checked = state.qrngEnabled;
+	if (qrngMode) qrngMode.value = state.qrngMode;
+	if (qrngProxyUrl) qrngProxyUrl.value = state.qrngProxyUrl;
+	if (qrngStatusLine) qrngStatusLine.textContent = formatQrngStatus();
+
 	openModal("settings-modal");
+}
+
+function formatQrngStatus(): string {
+	const s = getQrngStatus();
+	if (!state.qrngEnabled) return "Status: disabled";
+	if (state.ready && !isQrngPerTokenActive()) {
+		return "ERROR: per-token sampler patch failed to install - chat will refuse to generate until you disable QRNG. Check debug log.";
+	}
+	const lastFetch = s.lastFetchAt ? new Date(s.lastFetchAt).toLocaleTimeString() : "never";
+	const ok = s.lastFetchOk ? "ok" : s.lastError ? `error (${s.lastError})` : "pending";
+	return `Pool: ${s.poolBytes} bytes - last fetch ${lastFetch} ${ok} - tokens quantum/skipped/failed: ${s.tokensQuantum}/${s.tokensSkipped}/${s.tokensFetchFailed}`;
 }
 
 function formatVram(mb: number): string {
@@ -213,6 +235,20 @@ async function handleSaveSettings(): Promise<void> {
 		state.voiceEngine = voiceEngineSelect.value as AppState["voiceEngine"];
 	}
 
+	const qrngEnabled = document.getElementById("qrng-enabled") as HTMLInputElement | null;
+	const qrngMode = document.getElementById("qrng-mode") as HTMLSelectElement | null;
+	const qrngProxyUrl = document.getElementById("qrng-proxy-url") as HTMLInputElement | null;
+	if (qrngEnabled) state.qrngEnabled = qrngEnabled.checked;
+	if (qrngMode && (qrngMode.value === "buffer" || qrngMode.value === "realtime")) {
+		state.qrngMode = qrngMode.value;
+	}
+	if (qrngProxyUrl) state.qrngProxyUrl = qrngProxyUrl.value.trim();
+	configureQrng({
+		enabled: state.qrngEnabled,
+		mode: state.qrngMode,
+		proxyUrl: state.qrngProxyUrl,
+	});
+
 	const newModelId = modelSelect?.value || state.modelId;
 	const modelChanged = newModelId !== state.modelId;
 
@@ -244,34 +280,121 @@ async function handleSaveSettings(): Promise<void> {
 function initMemoryModal(): void {
 	const createTab = document.getElementById("tab-create");
 	const loadTab = document.getElementById("tab-load");
+	const viewTab = document.getElementById("tab-view");
 	const createCancel = document.getElementById("memory-create-cancel");
 	const loadCancel = document.getElementById("memory-load-cancel");
+	const viewClose = document.getElementById("memory-view-close");
+	const viewUpdate = document.getElementById("memory-view-update");
+	const viewCopyUrl = document.getElementById("memory-view-copy-url");
 	const createSubmit = document.getElementById("memory-create-submit");
 	const loadSubmit = document.getElementById("memory-load-submit");
 	const copyBtn = document.getElementById("memory-copy-url");
+	const qrngEnable = document.getElementById("memory-qrng-enable") as HTMLInputElement | null;
 
 	createTab?.addEventListener("click", () => switchMemoryTab("create"));
 	loadTab?.addEventListener("click", () => switchMemoryTab("load"));
+	viewTab?.addEventListener("click", () => switchMemoryTab("view"));
 	createCancel?.addEventListener("click", () => closeModal("memory-modal"));
 	loadCancel?.addEventListener("click", () => closeModal("memory-modal"));
+	viewClose?.addEventListener("click", () => closeModal("memory-modal"));
+	viewUpdate?.addEventListener("click", handleUpdateMemory);
+	viewCopyUrl?.addEventListener("click", handleCopyViewUrl);
 	createSubmit?.addEventListener("click", handleCreateMemory);
 	loadSubmit?.addEventListener("click", handleLoadMemory);
 	copyBtn?.addEventListener("click", handleCopyUrl);
+
+	// Show/hide the QRNG mode dropdown based on the enable toggle
+	const toggleQrngDetails = () => {
+		const cfg = document.getElementById("memory-qrng-config");
+		if (cfg) cfg.style.display = qrngEnable?.checked ? "" : "none";
+	};
+	qrngEnable?.addEventListener("change", toggleQrngDetails);
+	toggleQrngDetails();
+
+	// Close X button at top of memory modal
+	const closeBtn = document.getElementById("memory-modal-close");
+	closeBtn?.addEventListener("click", () => closeModal("memory-modal"));
 }
 
 let memoryUrl = "";
 
-function switchMemoryTab(tab: "create" | "load"): void {
-	const isCreate = tab === "create";
-	const createTab = document.getElementById("memory-create-tab");
-	const loadTab = document.getElementById("memory-load-tab");
-	const createBtn = document.getElementById("tab-create");
-	const loadBtn = document.getElementById("tab-load");
+type MemoryTab = "create" | "load" | "view";
 
-	if (createTab) createTab.style.display = isCreate ? "" : "none";
-	if (loadTab) loadTab.style.display = isCreate ? "none" : "";
-	createBtn?.classList.toggle("btn-primary", isCreate);
-	loadBtn?.classList.toggle("btn-primary", !isCreate);
+function switchMemoryTab(tab: MemoryTab): void {
+	const map: Record<MemoryTab, string> = {
+		create: "memory-create-tab",
+		load: "memory-load-tab",
+		view: "memory-view-tab",
+	};
+	const buttonMap: Record<MemoryTab, string> = {
+		create: "tab-create",
+		load: "tab-load",
+		view: "tab-view",
+	};
+	for (const k of Object.keys(map) as MemoryTab[]) {
+		const el = document.getElementById(map[k]);
+		if (el) el.style.display = k === tab ? "" : "none";
+		const btn = document.getElementById(buttonMap[k]);
+		btn?.classList.toggle("btn-primary", k === tab);
+	}
+	if (tab === "create") refreshCreateTab();
+	if (tab === "view") refreshViewTab();
+}
+
+function refreshCreateTab(): void {
+	const modelSelect = document.getElementById("memory-model-select") as HTMLSelectElement | null;
+	if (modelSelect) {
+		const current = modelSelect.value;
+		const options = ['<option value="">Keep recipient\'s</option>'];
+		for (const m of MODELS) {
+			const selected = m.id === (current || state.modelId) ? " selected" : "";
+			options.push(`<option value="${escapeAttr(m.id)}"${selected}>${escapeText(m.label)}</option>`);
+		}
+		modelSelect.innerHTML = options.join("");
+	}
+	const qrngEnableInput = document.getElementById("memory-qrng-enable") as HTMLInputElement | null;
+	const qrngModeSelect = document.getElementById("memory-qrng-mode") as HTMLSelectElement | null;
+	if (qrngEnableInput) qrngEnableInput.checked = state.qrngEnabled;
+	if (qrngModeSelect) qrngModeSelect.value = state.qrngMode;
+	// Sync the mode dropdown visibility to the toggle state
+	const cfg = document.getElementById("memory-qrng-config");
+	if (cfg) cfg.style.display = qrngEnableInput?.checked ? "" : "none";
+}
+
+function refreshViewTab(): void {
+	const active = getActiveMemory();
+	const text = document.getElementById("memory-view-text") as HTMLTextAreaElement | null;
+	const modelEl = document.getElementById("memory-view-model");
+	const qrngEl = document.getElementById("memory-view-qrng");
+	const pw = document.getElementById("memory-view-password") as HTMLInputElement | null;
+	const result = document.getElementById("memory-view-result");
+	const updateBtn = document.getElementById("memory-view-update") as HTMLButtonElement | null;
+	if (text) {
+		text.value = active?.memory ?? "";
+		text.placeholder = active ? "" : "No memory loaded";
+		text.disabled = !active;
+	}
+	if (modelEl) modelEl.textContent = active?.model ? active.model : "(none - recipient picks)";
+	if (qrngEl) {
+		if (active?.qrng) {
+			qrngEl.textContent = `enabled=${active.qrng.enabled}, mode=${active.qrng.mode}`;
+		} else {
+			qrngEl.textContent = "(not set - recipient keeps their setting)";
+		}
+	}
+	if (pw) pw.value = "";
+	if (result) result.style.display = "none";
+	if (updateBtn) updateBtn.disabled = !active;
+	viewMemoryUrl = "";
+}
+
+function escapeText(s: string): string {
+	return s.replace(/[&<>"']/g, (c) =>
+		({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] || c,
+	);
+}
+function escapeAttr(s: string): string {
+	return escapeText(s);
 }
 
 async function handleCreateMemory(): Promise<void> {
@@ -283,7 +406,19 @@ async function handleCreateMemory(): Promise<void> {
 		return;
 	}
 
-	const url = await createEncryptedMemory(text, pw);
+	const modelSelect = document.getElementById("memory-model-select") as HTMLSelectElement | null;
+	const qrngEnable = document.getElementById("memory-qrng-enable") as HTMLInputElement | null;
+	const qrngModeSelect = document.getElementById("memory-qrng-mode") as HTMLSelectElement | null;
+
+	const opts: Parameters<typeof createEncryptedMemory>[2] = {};
+	if (modelSelect?.value) opts.model = modelSelect.value;
+	// Always encode QRNG state so opening the URL deterministically sets the
+	// recipient to on-or-off, regardless of what they had before. Otherwise
+	// unchecking the toggle here would leave the recipient's prior state intact.
+	opts.qrngEnabled = !!qrngEnable?.checked;
+	opts.qrngMode = qrngModeSelect?.value === "realtime" ? "realtime" : "buffer";
+
+	const url = await createEncryptedMemory(text, pw, opts);
 	if (url) {
 		memoryUrl = url;
 		const display = document.getElementById("memory-url-display");
@@ -291,6 +426,57 @@ async function handleCreateMemory(): Promise<void> {
 		if (display) display.textContent = url;
 		if (result) result.style.display = "";
 		showToast("Encrypted");
+	}
+}
+
+let viewMemoryUrl = "";
+
+async function handleUpdateMemory(): Promise<void> {
+	const text = (document.getElementById("memory-view-text") as HTMLTextAreaElement | null)?.value;
+	const pw = (document.getElementById("memory-view-password") as HTMLInputElement | null)?.value;
+	if (!text?.trim() || !pw) {
+		showToast("Fill memory and password");
+		return;
+	}
+	const active = getActiveMemory();
+	if (!active) {
+		showToast("No active memory to update");
+		return;
+	}
+	// Re-encrypt with the SAME model + QRNG settings that the original
+	// payload carried, but the updated text, under the user-provided password.
+	const opts: Parameters<typeof createEncryptedMemory>[2] = {};
+	if (active.model) opts.model = active.model;
+	if (active.qrng) {
+		opts.qrngEnabled = active.qrng.enabled;
+		opts.qrngMode = active.qrng.mode;
+	}
+	const url = await createEncryptedMemory(text, pw, opts);
+	if (!url) return;
+
+	viewMemoryUrl = url;
+	// Update the live location hash so the current tab's URL reflects the
+	// new ciphertext - shareable immediately.
+	const hash = url.split("#")[1] ?? "";
+	try {
+		history.replaceState(null, "", `${location.pathname}#${hash}`);
+	} catch {/* noop - replaceState may fail in exotic contexts */}
+
+	// Update runtime state so subsequent prompts see the new memory.
+	state.memory = text;
+	const { updateMemoryIndicator } = await import("../memory");
+	updateMemoryIndicator();
+
+	const display = document.getElementById("memory-view-url-display");
+	const result = document.getElementById("memory-view-result");
+	if (display) display.textContent = url;
+	if (result) result.style.display = "";
+	showToast("Memory updated");
+}
+
+function handleCopyViewUrl(): void {
+	if (viewMemoryUrl) {
+		navigator.clipboard.writeText(viewMemoryUrl).then(() => showToast("Copied!"));
 	}
 }
 
@@ -422,6 +608,16 @@ export function startEngineLoad(): void {
 			const sendBtn = document.getElementById("send-btn") as HTMLButtonElement | null;
 			if (sendBtn) sendBtn.disabled = false;
 			hideLoadingOverlay();
+			// Expose for diagnostic introspection (debug pane, e2e tests).
+			// The engine is already in-memory in state; this just gives a
+			// stable global handle that doesn't depend on knowing module paths.
+			// biome-ignore lint/suspicious/noExplicitAny: window augmentation
+			(window as any).__oppen = {
+				engine,
+				state,
+				isQrngPerTokenActive,
+				getQrngStatus,
+			};
 		},
 		onError(lines) {
 			if (dot) dot.className = "dot error";

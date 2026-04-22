@@ -8,13 +8,16 @@ Truly open, private AI chat that runs entirely on your device. No servers, no cl
 
 ## How it works
 
-Oppen AI runs large language models directly in your browser using WebGPU and WebAssembly. The models are small enough to fit on a phone (135M-7B parameters, 270MB-5GB VRAM) but come with real trade-offs:
+Oppen AI runs large language models directly in your browser using WebGPU and WebAssembly. Models range from 135M to 7B parameters (270 MB to 5 GB VRAM) and come with real trade-offs:
 
-- **Small models, small context** - all models have a 4096-token context window (~3000 words). Conversations are automatically truncated to fit, with the most recent messages preserved and older ones dropped.
-- **Document handling** - when you upload a PDF, text file, or image, the text is extracted locally. If the extracted text is too long for the context window, Oppen AI uses the chat model itself to summarize it in batches before injecting it into the conversation.
-- **Image OCR** - text is extracted from photos using Tesseract.js (full-page OCR, ~4MB, runs alongside the chat model). On browsers that support the TextDetector API, native browser OCR is tried first.
-- **Voice input** - speech-to-text via the browser's Web Speech API (default) or on-device Whisper model.
-- **Early preview** - these are small models that will hallucinate, get facts wrong, and struggle with complex conversations. Treat responses as a starting point, not a source of truth.
+- **Small models, small context** - default 4096-token context window (~3000 words). Conversations are automatically truncated to fit; system prompt and most-recent messages are preserved, older history is dropped.
+- **Document handling** - PDFs, text files, and images are processed locally. Long text is summarised in batches by the loaded chat model before being injected into the conversation.
+- **Image OCR** - Tesseract.js (~4 MB, full-page OCR) extracts text from photos. The browser's `TextDetector` API is tried first when available.
+- **Voice input** - browser Web Speech API (default) or on-device Whisper model.
+- **Voice output** - tap the speaker icon on a reply to read it aloud via `SpeechSynthesis`. Stays on across replies; chunks word-by-word during slow QRNG generation, phrase-by-phrase otherwise.
+- **Encrypted shareable memory** - paste any text + password into Memory → Create to produce a `#/memory/<ciphertext>` URL hash. The URL also carries the chosen model and QRNG settings so the recipient lands on a fully configured chat. AES-256-GCM, 32 KB cap, never leaves the browser.
+- **Quantum randomness (experimental, off by default)** - reseeds every token sample with bytes streamed live from the [ANU](https://qrng.anu.edu.au/) quantum optical experiment. Adds a per-prompt quantum-derived temperature too. See the section below.
+- **Early preview** - small models hallucinate, get facts wrong, and lose track of long conversations. Treat responses as a starting point, not a source of truth.
 
 ## Supported Devices and GPUs
 
@@ -126,6 +129,42 @@ If you see `Failed to execute 'put' on 'Cache'` in the console:
 - Unregister the service worker: DevTools (F12) - Application - Service Workers - Unregister
 - Reload the page
 
+## Quantum randomness (experimental)
+
+Click the atom icon in the chat toolbar (or Settings → Experimental) to flip on real quantum entropy from the [Australian National University's](https://qrng.anu.edu.au/) quantum optical experiment. Off by default.
+
+### What it does
+
+LLMs sample tokens from a probability distribution; that sampling needs randomness. With QRNG on, two things happen:
+
+1. **Per-token reseed.** Before every single token sample, the LLM's RNG is reseeded with 4 bytes of fresh quantum entropy. Every individual word the model picks is anchored to physical quantum noise.
+2. **Per-prompt temperature.** When you submit a prompt, one quantum u32 is mapped to a sampling temperature in `[0.5, 1.0]`. Each response gets a different "creativity dial" from the universe.
+
+### How it works
+
+1. The [`qrng-proxy/`](qrng-proxy/) Cloudflare Worker at [`qrng.oppen.ai`](https://qrng.oppen.ai) sits between the browser and ANU. It pulls 4 bytes every 500 ms from ANU's endpoint and broadcasts them to every connected client over WebSocket.
+2. The chat app keeps the WebSocket open whenever QRNG is enabled, but **only consumes bytes during active generation** - bytes that arrive while the model is idle are discarded. This guarantees per-token entropy is fresh, not stale-buffered.
+3. WebLLM's `sampleTokenFromLogits` is monkey-patched: it awaits the next 4 bytes from the local buffer and calls `setSeed(u32)` before each sample.
+4. If the WebSocket can't deliver bytes within a short deadline, the sampler throws `QRNG_STREAM_LOST`. The chat shows *"I lost my quantum random real-time feed"* instead of degrading silently.
+
+The atom icon in the chat toolbar pulses with a tiny orbiting electron every time a quantum byte arrives. Click it to toggle on/off without leaving the chat.
+
+### Limits
+
+- **Throughput** is bounded by ANU. Sustained ~4-8 bytes/sec from the Cloudflare egress IP, which means ~1-2 token reseeds per second. **Generation is noticeably slower with QRNG on.**
+- Same byte stream is broadcast to every client - within a refresh window two browsers may consume overlapping bytes. Acceptable for the LLM-seeding use case; not crypto-grade unique-per-call.
+- No fallback. If the patch can't be installed for a future WebLLM version, or if the stream stalls, chat refuses to generate. By design.
+
+### Get the bytes yourself
+
+```sh
+curl 'https://qrng.oppen.ai/?length=8'
+# -> {"success":true,"bytes":[42,17,...],"length":8,"source":"anu-demo",
+#     "fetchedAt":<ms>,"ageMs":<ms>,"ts":<ms>}
+```
+
+The HTTP endpoint is capped at 64 bytes per request. For continuous streaming, open a WebSocket to the same URL - see [`qrng-proxy/README.md`](qrng-proxy/README.md).
+
 ## Toolchain (Nix flake)
 
 All tooling for this repo lives in `flake.nix` - Node.js, npm, Playwright browsers, AWS CLI, jq, curl, etc. You don't need to install any of them globally.
@@ -180,10 +219,13 @@ npm run build        # tsc + vite build, output in dist/
 ```bash
 nix develop
 cd webchat
-npm test             # playwright - 73 tests, ~40s
+npm test                                   # playwright - all UI specs
+RUN_LLM_PIPELINE=1 npm test -- \
+    tests/qrng-llm-pipeline.spec.ts \
+    --headed --workers=1                   # full LLM + QRNG end-to-end (~40s, downloads model)
 ```
 
-Playwright uses the pinned Chromium from the flake; no separate browser install step.
+Playwright uses the pinned Chromium from the flake; no separate browser install step. UI-only specs use a `?noengine=1` query param hatch in `main.ts` (localhost-only) to skip WebLLM load and finish in seconds.
 
 ## Build & Deploy
 
@@ -227,7 +269,8 @@ website/infra/deploy.sh prd --artifact website/infra/artifacts/20260216_143000
 ```bash
 nix develop
 
-# Build - runs Vite build, creates timestamped artifact
+# Build - runs Vite build, creates timestamped artifact, bumps the
+# service-worker cache key so users get fresh assets on next visit
 webchat/infra/build.sh
 
 # Deploy to production
@@ -239,6 +282,21 @@ webchat/infra/deploy.sh test
 
 # Dry run
 webchat/infra/deploy.sh prd --test
+```
+
+### QRNG proxy (qrng.oppen.ai)
+
+The Cloudflare Worker that streams quantum bytes to the chat. See
+[`qrng-proxy/README.md`](qrng-proxy/README.md) for architecture and full
+endpoint reference.
+
+```bash
+nix develop
+cd qrng-proxy
+npx wrangler login        # first time only
+./deploy.sh --test        # dry-run
+./deploy.sh               # actual deploy
+node test.mjs https://qrng.oppen.ai   # integration tests
 ```
 
 ## Open Source Libraries

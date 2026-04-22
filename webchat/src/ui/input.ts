@@ -1,7 +1,12 @@
 import { clearCurrentChat, sendMessage } from "../chat";
+import { dlog } from "../debug";
 import { processDocument } from "../documents";
 import { state } from "../state";
 import { isRecording, startRecording, stopRecording } from "../voice";
+import { SVG_STOP } from "./renderer";
+
+const SEND_SVG =
+	'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="14" y2="3"/><polyline points="14 10 14 3 7 3"/></svg>';
 
 export function initInput(): void {
 	const input = document.getElementById("chat-input") as HTMLTextAreaElement | null;
@@ -13,7 +18,7 @@ export function initInput(): void {
 		requestAnimationFrame(() => {
 			input.style.height = "auto";
 			input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
-			sendBtn.disabled = !input.value.trim() || !state.ready;
+			refreshSendButton();
 		});
 	});
 
@@ -21,31 +26,63 @@ export function initInput(): void {
 	input.addEventListener("keydown", (e) => {
 		if (e.key === "Enter" && !e.shiftKey) {
 			e.preventDefault();
-			handleSend();
+			handleSendClick();
 		}
 	});
 
-	// Send button click
-	sendBtn.addEventListener("click", handleSend);
+	// Send button click - either start a new send, or stop the current generation
+	sendBtn.addEventListener("click", handleSendClick);
 
 	// Action buttons
 	initActionButtons();
 }
 
-function handleSend(): void {
+function handleSendClick(): void {
+	if (state.generating) {
+		stopGeneration();
+		return;
+	}
 	const input = document.getElementById("chat-input") as HTMLTextAreaElement | null;
 	if (!input) return;
-
 	const text = input.value.trim();
 	if (!text) return;
-
 	input.value = "";
 	input.style.height = "auto";
-
-	const sendBtn = document.getElementById("send-btn") as HTMLButtonElement | null;
-	if (sendBtn) sendBtn.disabled = true;
-
 	sendMessage(text);
+}
+
+function stopGeneration(): void {
+	dlog("info", "chat", "User pressed stop - interrupting generation");
+	try {
+		const eng = state.engine as { interruptGenerate?: () => void } | null;
+		eng?.interruptGenerate?.();
+	} catch (e) {
+		dlog("warn", "chat", `interruptGenerate threw: ${(e as Error).message}`);
+	}
+}
+
+/**
+ * Sync the send button's mode (send/stop) and disabled state with the
+ * current state. Called from input events, from chat.ts on generation
+ * start/end, and from engine ready transitions.
+ */
+export function refreshSendButton(): void {
+	const input = document.getElementById("chat-input") as HTMLTextAreaElement | null;
+	const sendBtn = document.getElementById("send-btn") as HTMLButtonElement | null;
+	if (!sendBtn) return;
+	if (state.generating) {
+		sendBtn.disabled = false;
+		sendBtn.classList.add("stop-mode");
+		sendBtn.setAttribute("aria-label", "Stop generation");
+		sendBtn.setAttribute("title", "Stop");
+		sendBtn.innerHTML = SVG_STOP;
+	} else {
+		sendBtn.disabled = !input?.value.trim() || !state.ready;
+		sendBtn.classList.remove("stop-mode");
+		sendBtn.setAttribute("aria-label", "Send");
+		sendBtn.setAttribute("title", "Send");
+		sendBtn.innerHTML = SEND_SVG;
+	}
 }
 
 function initActionButtons(): void {
@@ -121,6 +158,10 @@ async function handleVoiceToggle(): Promise<void> {
 				input.style.height = "auto";
 				input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
 				input.focus();
+				// Programmatic .value assignment doesn't fire "input", so the
+				// send button stays disabled. Sync state explicitly.
+				input.dispatchEvent(new Event("input", { bubbles: true }));
+				refreshSendButton();
 			}
 		}
 	} else {
@@ -128,10 +169,5 @@ async function handleVoiceToggle(): Promise<void> {
 	}
 }
 
-export function updateSendButton(): void {
-	const input = document.getElementById("chat-input") as HTMLTextAreaElement | null;
-	const sendBtn = document.getElementById("send-btn") as HTMLButtonElement | null;
-	if (input && sendBtn) {
-		sendBtn.disabled = !input.value.trim() || !state.ready;
-	}
-}
+// Backwards-compat alias - older callers use updateSendButton().
+export const updateSendButton = refreshSendButton;

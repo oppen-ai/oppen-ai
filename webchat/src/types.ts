@@ -10,6 +10,12 @@ export interface Message {
 	role: "user" | "assistant" | "system";
 	content: string;
 	timestamp: number;
+	/** Error-message stub that was written in place of a real assistant
+	 *  reply (QRNG stream lost, model crashed, etc.). Still shown in the
+	 *  UI so the user knows what happened, but deliberately excluded from
+	 *  the context we send to the LLM - otherwise the model reads it as
+	 *  a previous assistant turn and imitates the apologetic phrasing. */
+	isError?: boolean;
 }
 
 export interface AppSettings {
@@ -39,12 +45,16 @@ export interface AppState {
 	voiceEngine: "whisper" | "webspeech";
 	pendingAttachment: { name: string; text: string } | null;
 	debug: boolean;
+	qrngEnabled: boolean;
+	qrngMode: "buffer" | "realtime";
+	qrngProxyUrl: string;
 }
 
 // WebLLM types (dynamically imported from CDN)
 export interface MLCEngine {
 	setInitProgressCallback(cb: (report: ProgressReport) => void): void;
 	reload(modelId: string): Promise<void>;
+	interruptGenerate?(): void | Promise<void>;
 	chat: {
 		completions: {
 			create(params: ChatParams): Promise<AsyncIterable<ChatChunk>>;

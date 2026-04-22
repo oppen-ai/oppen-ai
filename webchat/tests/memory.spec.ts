@@ -4,7 +4,8 @@ test.describe("Memory", () => {
 	test("memory modal opens with tabs", async ({ page }) => {
 		// Use wide viewport so sidebar is visible
 		await page.setViewportSize({ width: 1024, height: 768 });
-		await page.goto("/");
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 		await page.locator("#memory-btn").click();
 		await expect(page.locator("#memory-modal")).toHaveClass(/visible/);
 		await expect(page.locator("#tab-create")).toBeVisible();
@@ -13,7 +14,8 @@ test.describe("Memory", () => {
 
 	test("memory tabs switch content", async ({ page }) => {
 		await page.setViewportSize({ width: 1024, height: 768 });
-		await page.goto("/");
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 		await page.locator("#memory-btn").click();
 		await expect(page.locator("#memory-modal")).toHaveClass(/visible/);
 

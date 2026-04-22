@@ -1,0 +1,22 @@
+name = "oppen-qrng-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Durable Object holds the single global pool of quantum bytes. The DO
+# self-schedules an alarm every 30s to refresh from ANU, so client requests
+# never block on upstream latency. Single instance keyed "global" so all
+# CF data centers share the same fresh pool.
+
+[[durable_objects.bindings]]
+name = "QRNG_POOL"
+class_name = "QrngPool"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["QrngPool"]
+
+# Bind to qrng.oppen.ai. `custom_domain = true` makes wrangler auto-create
+# the DNS record on deploy - oppen.ai must be on Cloudflare for this to work.
+routes = [
+  { pattern = "qrng.oppen.ai", custom_domain = true }
+]

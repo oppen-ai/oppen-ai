@@ -1,9 +1,16 @@
 import { dlog } from "./debug";
+import { isQrngActive, nextQuantumU32 } from "./qrng";
 import type { MLCEngine, ProgressReport } from "./types";
 import { showToast } from "./ui/toast";
 
 // biome-ignore lint/suspicious/noExplicitAny: WebLLM is dynamically imported from CDN
 let webllm: any = null;
+let qrngPatchInstalled = false;
+let qrngPatchSucceeded = false;
+
+export function isQrngPerTokenActive(): boolean {
+	return qrngPatchSucceeded && isQrngActive();
+}
 
 export interface ModelInfo {
 	id: string;
@@ -133,8 +140,9 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 		return;
 	}
 
-	// Diagnostic 4: HuggingFace connectivity
-	callbacks.onStatusText("Testing connection to model server...");
+	// Connectivity check (non-blocking - model may be cached for offline use)
+	let isOnline = true;
+	callbacks.onStatusText("Checking connection...");
 	const testUrl = `https://huggingface.co/api/models/mlc-ai/${modelId}`;
 	dlog("network", "engine", `Preflight check: ${testUrl}`);
 	try {
@@ -145,35 +153,27 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 			dlog("info", "engine", "HuggingFace connectivity OK");
 		}
 	} catch (err) {
+		isOnline = false;
 		const msg = (err as Error).message || String(err);
-		dlog("error", "engine", `HuggingFace connectivity FAILED: ${msg}`);
-		callbacks.onDiagnosticError([
-			"Cannot reach model server (huggingface.co).",
-			"",
-			"Possible fixes:",
-			"Check if a content blocker is active",
-			"Try opening https://huggingface.co in a new tab",
-			"On Safari: disable 'Prevent cross-site tracking'",
-			"",
-			`Error: ${msg}`,
-		]);
-		return;
+		dlog("warn", "engine", `Offline or HuggingFace unreachable: ${msg}`);
+		dlog("info", "engine", "Will try loading model from cache...");
+		callbacks.onStatusText("Offline - loading model from cache...");
 	}
 
-	// Diagnostic 5: Test model file fetch (catches CSP/CORS/redirect issues)
-	const configUrl = `https://huggingface.co/mlc-ai/${modelId}/resolve/main/mlc-chat-config.json`;
-	dlog("network", "engine", `Testing model config fetch: ${configUrl}`);
-	try {
-		const configResp = await fetch(configUrl, { mode: "cors" });
-		if (configResp.ok) {
-			dlog("info", "engine", `Model config fetch OK (${configResp.status}), final URL reachable`);
-		} else {
-			dlog("warn", "engine", `Model config fetch HTTP ${configResp.status}: ${configResp.statusText}`);
+	if (isOnline) {
+		const configUrl = `https://huggingface.co/mlc-ai/${modelId}/resolve/main/mlc-chat-config.json`;
+		dlog("network", "engine", `Testing model config fetch: ${configUrl}`);
+		try {
+			const configResp = await fetch(configUrl, { mode: "cors" });
+			if (configResp.ok) {
+				dlog("info", "engine", `Model config fetch OK (${configResp.status}), final URL reachable`);
+			} else {
+				dlog("warn", "engine", `Model config fetch HTTP ${configResp.status}: ${configResp.statusText}`);
+			}
+		} catch (err) {
+			const msg = (err as Error).message || String(err);
+			dlog("warn", "engine", `Model config fetch failed: ${msg} - will try cache`);
 		}
-	} catch (err) {
-		const msg = (err as Error).message || String(err);
-		dlog("error", "engine", `Model config fetch FAILED: ${msg}`);
-		dlog("error", "engine", "This likely means CSP, CORS, or a content blocker is preventing model downloads");
 	}
 
 	// Load engine
@@ -188,6 +188,7 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 			}
 		});
 		await engine.reload(modelId);
+		patchEngineForQrng(engine);
 		dlog("info", "engine", "Model loaded successfully - ready to chat");
 		callbacks.onReady(engine);
 		showToast("Model loaded - ready to chat");
@@ -199,6 +200,10 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 			dlog("debug", "engine", `Stack: ${stack.slice(0, 500)}`);
 		}
 		const lines = ["Something went wrong loading the model.", ""];
+		if (!isOnline && (msg.includes("fetch") || msg.includes("network") || msg.includes("Failed"))) {
+			lines.push("You appear to be offline and this model is not cached.");
+			lines.push("Connect to the internet to download it first, then it will work offline.");
+		}
 		if (modelId.includes("f16")) {
 			lines.push("This model needs special GPU support. Try a different model in Settings.");
 		}
@@ -219,17 +224,134 @@ export async function initEngine(modelId: string, callbacks: EngineCallbacks): P
 	}
 }
 
+/**
+ * Monkey-patch the loaded WebLLM pipeline so every per-token sample reseeds
+ * the TVM RNG with a quantum-derived u32 (when QRNG is enabled). Idempotent
+ * across model reloads - we patch the prototype once.
+ *
+ * Access path: WebLLM's `MLCEngine` keeps loaded pipelines in a private
+ * `loadedModelIdToPipeline: Map<string, LLMChatPipeline>` property. The
+ * `private` modifier is a TypeScript compile-time fiction; at runtime the
+ * property is a normal JS field and accessible via bracket notation.
+ *
+ * We deliberately do NOT use the LogitProcessor public hook here because it
+ * gives logit perturbation, not RNG reseeding - the user wants the latter.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: introspecting CDN module
+function patchEngineForQrng(engine: any): void {
+	if (qrngPatchInstalled) return;
+	qrngPatchInstalled = true;
+
+	try {
+		// Snake-case fallback covers the off chance that a future build emits
+		// snake_case property names (TVM Python conventions occasionally leak).
+		const pipelineMap: unknown =
+			engine?.loadedModelIdToPipeline ?? engine?.loaded_model_id_to_pipeline;
+
+		if (!(pipelineMap instanceof Map)) {
+			const keys = engine ? Object.getOwnPropertyNames(engine).join(", ") : "(none)";
+			dlog(
+				"warn",
+				"qrng",
+				`patch: loadedModelIdToPipeline missing (engine props: ${keys}) - per-token QRNG unavailable`,
+			);
+			return;
+		}
+		if (pipelineMap.size === 0) {
+			dlog("warn", "qrng", "patch: pipeline map is empty (engine.reload not finished?)");
+			return;
+		}
+
+		// We only ever load one model at a time, so first entry is the right one.
+		const pipeline = pipelineMap.values().next().value;
+		if (!pipeline) {
+			dlog("warn", "qrng", "patch: pipeline iterator returned null");
+			return;
+		}
+
+		const proto = Object.getPrototypeOf(pipeline);
+		const samplerOnProto = typeof proto?.sampleTokenFromLogits === "function";
+		const samplerOnInstance = typeof pipeline.sampleTokenFromLogits === "function";
+
+		if (!samplerOnProto && !samplerOnInstance) {
+			const protoKeys = proto ? Object.getOwnPropertyNames(proto).slice(0, 20).join(", ") : "(none)";
+			dlog(
+				"warn",
+				"qrng",
+				`patch: sampleTokenFromLogits not found on pipeline (proto methods: ${protoKeys}) - per-token QRNG unavailable`,
+			);
+			return;
+		}
+
+		// Prefer prototype patch (covers all instances), fall back to instance.
+		if (samplerOnProto) {
+			if (proto.__qrngPatched) {
+				qrngPatchSucceeded = true;
+				dlog("info", "qrng", "pipeline prototype already patched (model reload)");
+				return;
+			}
+			const original = proto.sampleTokenFromLogits;
+			// biome-ignore lint/suspicious/noExplicitAny: dynamic prototype patch
+			proto.sampleTokenFromLogits = async function (this: any, ...args: any[]) {
+				if (isQrngActive()) {
+					const u32 = await nextQuantumU32();
+					if (u32 === null) throw new Error("QRNG_STREAM_LOST");
+					try {
+						if (typeof this.setSeed === "function") {
+							this.setSeed(u32);
+						} else if (this.tvm && typeof this.tvm.setSeed === "function") {
+							this.tvm.setSeed(u32);
+						}
+					} catch (e) {
+						dlog("warn", "qrng", `setSeed failed: ${(e as Error).message}`);
+					}
+				}
+				return original.apply(this, args);
+			};
+			proto.__qrngPatched = true;
+		} else {
+			const original = pipeline.sampleTokenFromLogits.bind(pipeline);
+			// biome-ignore lint/suspicious/noExplicitAny: dynamic instance patch
+			pipeline.sampleTokenFromLogits = async function (this: any, ...args: any[]) {
+				if (isQrngActive()) {
+					const u32 = await nextQuantumU32();
+					if (u32 === null) throw new Error("QRNG_STREAM_LOST");
+					try {
+						if (typeof pipeline.setSeed === "function") {
+							pipeline.setSeed(u32);
+						} else if (pipeline.tvm && typeof pipeline.tvm.setSeed === "function") {
+							pipeline.tvm.setSeed(u32);
+						}
+					} catch (e) {
+						dlog("warn", "qrng", `setSeed failed: ${(e as Error).message}`);
+					}
+				}
+				return original(...args);
+			};
+		}
+		qrngPatchSucceeded = true;
+		dlog(
+			"info",
+			"qrng",
+			`patched sampleTokenFromLogits via loadedModelIdToPipeline (${samplerOnProto ? "prototype" : "instance"})`,
+		);
+	} catch (e) {
+		dlog("warn", "qrng", `patch failed: ${(e as Error).message}`);
+	}
+}
+
 export async function streamChat(
 	engine: MLCEngine,
 	messages: { role: string; content: string }[],
 	onChunk: (fullText: string) => void,
+	temperature = 0.7,
 ): Promise<string> {
 	let full = "";
 	const chunks = await engine.chat.completions.create({
 		messages,
 		stream: true,
 		max_tokens: 1024,
-		temperature: 0.7,
+		temperature,
 		top_p: 0.9,
 	});
 	for await (const chunk of chunks) {

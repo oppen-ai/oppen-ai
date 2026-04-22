@@ -5,6 +5,7 @@ interface LogEntry {
 	level: LogLevel;
 	source: string;
 	message: string;
+	dedupKey?: string;
 }
 
 const MAX_ENTRIES = 500;
@@ -42,13 +43,42 @@ export function setDebugEnabled(on: boolean): void {
 	if (container) {
 		container.style.display = on ? "block" : "none";
 	}
+	// Toggle a body class so the chat layout reserves space at the bottom
+	// for the debug pane (otherwise the fixed-position pane covers the
+	// input row).
+	document.body.classList.toggle("debug-on", on);
 	if (on) {
 		scheduleRender();
 	}
 }
 
-export function dlog(level: LogLevel, source: string, message: string): void {
-	const entry: LogEntry = { time: Date.now(), level, source, message };
+export function dlog(level: LogLevel, source: string, message: string, dedupKey?: string): void {
+	// Dedup: if the most recent entry shares the same dedupKey (and that key
+	// is non-empty), overwrite it in place instead of appending. Useful for
+	// high-rate status updates (e.g. incoming QRNG bytes) that would
+	// otherwise drown out other log lines.
+	const last = entries[entries.length - 1];
+	if (dedupKey && last && last.dedupKey === dedupKey) {
+		last.time = Date.now();
+		last.level = level;
+		last.source = source;
+		last.message = message;
+		// Drop the already-rendered row from the DOM so the next render pass
+		// replaces it with the updated content. Tracks lastRenderedCount so
+		// flushRender re-emits just this one entry.
+		if (enabled) {
+			if (!listEl) listEl = document.getElementById("debug-list");
+			listEl?.lastElementChild?.remove();
+			lastRenderedCount = Math.max(0, entries.length - 1);
+			scheduleRender();
+		}
+		if (level === "error") {
+			errorCount++;
+			updateBadge();
+		}
+		return;
+	}
+	const entry: LogEntry = { time: Date.now(), level, source, message, dedupKey };
 	entries.push(entry);
 	if (entries.length > MAX_ENTRIES) {
 		entries.shift();

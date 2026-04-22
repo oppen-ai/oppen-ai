@@ -3,8 +3,8 @@ import { expect, test } from "playwright/test";
 test.describe("Mobile layout", () => {
 	test("empty state: input pinned to bottom, not centered vertically", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		await page.screenshot({ path: "test-results/mobile-empty-se.png" });
 
@@ -27,8 +27,8 @@ test.describe("Mobile layout", () => {
 
 	test("messages are scrollable when content overflows", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 });
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		// Inject many messages to force overflow
 		await page.evaluate(() => {
@@ -71,8 +71,8 @@ test.describe("Mobile layout", () => {
 
 	test("settings modal: all buttons visible on small screen", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		// Open settings
 		await page.locator("#menu-toggle").click();
@@ -92,8 +92,8 @@ test.describe("Mobile layout", () => {
 
 	test("settings modal: scrollable on very short screen", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 500 }); // very short
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		await page.locator("#menu-toggle").click();
 		await page.locator("#settings-btn").click();

@@ -1,8 +1,11 @@
 import { dlog } from "./debug";
 import { summarizeForContext } from "./documents";
-import { streamChat } from "./engine";
+import { isQrngPerTokenActive, streamChat } from "./engine";
+import { clearBuffer as clearQrngBuffer, isQrngActive, nextQuantumU32 } from "./qrng";
 import { sanitizeMarkdown } from "./security";
+import { onAssistantComplete, onAssistantUpdate } from "./speech";
 import { currentChat, deleteChat, generateId, saveChat, state } from "./state";
+import { refreshSendButton } from "./ui/input";
 import { applyTokenBudget, estimateTokens } from "./token-budget";
 import type { Chat, Message } from "./types";
 import { renderChatList, renderMessages, scrollToBottom } from "./ui/renderer";
@@ -49,6 +52,9 @@ function buildContext(chat: Chat): { role: string; content: string }[] {
 		msgs.push({ role: "system", content: systemParts.join("\n\n") });
 	}
 	for (const m of chat.messages.slice(-20)) {
+		// Skip error stubs (QRNG_STREAM_LOST etc.) so the model doesn't
+		// see them as its own past turns and imitate the phrasing.
+		if (m.isError) continue;
 		msgs.push({ role: m.role, content: m.content });
 	}
 	const totalBefore = msgs.reduce((s, m) => s + estimateTokens(m.content), 0);
@@ -111,10 +117,11 @@ export async function sendMessage(text: string): Promise<void> {
 			'<div class="typing-indicator"><span></span><span></span><span></span></div>';
 	}
 
-	// Stream response
+	// Stream response. Drop any leftover quantum bytes so this generation
+	// only consumes entropy that arrives from now on.
 	state.generating = true;
-	const sendBtn = document.getElementById("send-btn") as HTMLButtonElement | null;
-	if (sendBtn) sendBtn.disabled = true;
+	if (isQrngActive()) clearQrngBuffer();
+	refreshSendButton();
 
 	try {
 		const context = buildContext(chat);
@@ -127,24 +134,71 @@ export async function sendMessage(text: string): Promise<void> {
 			dlog("debug", "context", `  [${i}] ${m.role}: ${m.content.length} chars - "${m.content.slice(0, 120)}..."`);
 		}
 
-		await streamChat(state.engine, context, (fullText) => {
-			assistantMsg.content = fullText;
-			if (contentEl) contentEl.innerHTML = sanitizeMarkdown(fullText);
-			scrollToBottom();
-		});
+		// Per-token quantum seeding is the only supported mode. If the
+		// sampler patch failed to install (e.g., WebLLM internals shifted
+		// in an upgrade), we refuse to generate with an error.
+		if (isQrngActive() && !isQrngPerTokenActive()) {
+			throw new Error(
+				"Quantum randomness is enabled but the per-token sampler patch could not be installed for this WebLLM version. Disable Quantum randomness in Settings > Experimental, or file an issue.",
+			);
+		}
+
+		// Per-prompt quantum temperature. Derive once per response from a
+		// fresh quantum u32, mapped to [0.5, 1.0] - the coherent range for
+		// the small models we run (100M-3B params). Going past ~1.2 on
+		// these models produces gibberish because their probability
+		// distributions aren't sharp enough to survive high randomness.
+		// Per-token reseeding continues independently in the patched sampler.
+		let temperature = 0.7;
+		if (isQrngActive()) {
+			const tempU32 = await nextQuantumU32();
+			if (tempU32 === null) throw new Error("QRNG_STREAM_LOST");
+			temperature = 0.5 + (tempU32 / 0x100000000) * 0.5;
+			dlog(
+				"info",
+				"qrng",
+				`per-prompt quantum temperature: ${temperature.toFixed(3)} (from u32=${tempU32})`,
+			);
+		}
+
+		// The quantum stream is always-on when QRNG is enabled; the sampler
+		// consumes from its local buffer per token.
+		const assistantIdx = chat.messages.indexOf(assistantMsg);
+		const final = await streamChat(
+			state.engine,
+			context,
+			(fullText) => {
+				assistantMsg.content = fullText;
+				if (contentEl) contentEl.innerHTML = sanitizeMarkdown(fullText);
+				scrollToBottom();
+				onAssistantUpdate(chat.id, assistantIdx, fullText);
+			},
+			temperature,
+		);
+		onAssistantComplete(chat.id, assistantIdx, final);
 
 		assistantMsg.timestamp = Date.now();
 		chat.updatedAt = Date.now();
 		await saveChat(chat);
 	} catch (e) {
 		const errMsg = (e as Error).message || String(e);
-		assistantMsg.content = `Error: ${errMsg}`;
+		if (errMsg === "QRNG_STREAM_LOST") {
+			assistantMsg.content =
+				"I lost my quantum random real-time feed. Please try again later, or disable Quantum randomness in Settings > Experimental.";
+		} else {
+			assistantMsg.content = `Error: ${errMsg}`;
+		}
+		// Mark as error so buildContext skips it - otherwise the model reads
+		// it as one of its own previous replies and starts imitating the
+		// apology phrasing on unrelated follow-ups.
+		assistantMsg.isError = true;
 		if (contentEl) contentEl.innerHTML = sanitizeMarkdown(assistantMsg.content);
 		await saveChat(chat);
 	}
 
 	state.generating = false;
-	if (sendBtn) sendBtn.disabled = !state.ready;
+	if (isQrngActive()) clearQrngBuffer();
+	refreshSendButton();
 	renderChatList();
 }
 

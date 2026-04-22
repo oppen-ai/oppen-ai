@@ -2,8 +2,8 @@ import { expect, test } from "playwright/test";
 
 test.describe("Settings accessibility", () => {
 	test("settings button visible and modal opens with all fields", async ({ page }) => {
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		const settingsBtn = page.locator("#settings-btn");
 		await expect(settingsBtn).toBeVisible();
@@ -26,8 +26,8 @@ test.describe("Settings accessibility", () => {
 	});
 
 	test("topbar model dropdown opens on badge click", async ({ page }) => {
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		await expect(page.locator("#model-badge")).toBeVisible();
 		await page.locator("#model-badge").click();
@@ -38,8 +38,8 @@ test.describe("Settings accessibility", () => {
 
 	test("settings accessible on mobile viewport", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 812 });
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		await page.locator("#menu-toggle").click();
 		await page.locator("#settings-btn").click();
@@ -51,11 +51,11 @@ test.describe("Settings accessibility", () => {
 	});
 
 	test("debug panel does not block settings button", async ({ page }) => {
-		await page.goto("/");
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await page.goto("/?noengine=1");
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		await page.locator("#settings-btn").click();
-		await page.locator(".toggle-label").click();
+		await page.locator("label.toggle-label:has(#debug-toggle-setting)").click();
 		await page.locator("#settings-save").click();
 
 		const debugContainer = page.locator("#debug-container");

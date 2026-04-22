@@ -41,6 +41,7 @@
             echo ""
             echo "  webchat:    cd webchat && npm install && npm run dev"
             echo "  website:    cd website && npx serve -s . -l 8878"
+            echo "  qrng-proxy: cd qrng-proxy && npx wrangler login && ./deploy.sh"
             echo ""
           '';
         };

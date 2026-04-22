@@ -46,26 +46,33 @@ self.addEventListener("fetch", (event) => {
 async function cacheFirstModel(request) {
 	// Cache API only supports GET requests - skip HEAD/POST/etc.
 	if (request.method !== "GET") {
-		return fetch(request);
+		return fetch(request).catch(() => new Response("Offline", { status: 503 }));
 	}
 
 	const cache = await caches.open(MODEL_CACHE);
 	const cached = await cache.match(request);
 	if (cached) return cached;
 
-	const response = await fetch(request);
-	if (response.ok && response.status === 200) {
-		cache.put(request, response.clone());
+	try {
+		const response = await fetch(request);
+		if (response.ok && response.status === 200) {
+			cache.put(request, response.clone());
+		}
+		return response;
+	} catch (e) {
+		// Offline and not cached
+		return new Response("Offline - resource not cached", { status: 503 });
 	}
-	return response;
 }
 
 async function staleWhileRevalidate(request) {
 	const cache = await caches.open(APP_CACHE);
 	const cached = await cache.match(request);
-	const fetchPromise = fetch(request).then((response) => {
-		if (response.ok) cache.put(request, response.clone());
-		return response;
-	});
+	const fetchPromise = fetch(request)
+		.then((response) => {
+			if (response.ok) cache.put(request, response.clone());
+			return response;
+		})
+		.catch(() => cached || new Response("Offline", { status: 503 }));
 	return cached || fetchPromise;
 }

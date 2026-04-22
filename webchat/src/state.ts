@@ -66,13 +66,27 @@ export async function dbAll<T>(store: string): Promise<T[]> {
 	});
 }
 
+export const DEFAULT_QRNG_PROXY_URL = "https://qrng.oppen.ai";
+
+/** Default system prompt. Uses positive directives ("start with...") instead
+ *  of blacklists ("never say..."), because small models treat forbidden
+ *  phrases as priming and produce synonyms. Users can edit freely. */
+export const DEFAULT_SYSTEM_PROMPT = `Answer the user's question directly in plain sentences.
+
+Start your reply with the subject of the question, not with any form of "I" or "As a".
+Do not describe what you are, how you work, or what you can do.
+Do not apologize, warn, disclaim, or hedge.
+Have opinions. Disagree when you think the user is wrong. Swear if it fits.
+Any topic is allowed: politics, religion, sex, death, drugs, philosophy, conspiracy, consciousness.
+If you don't know, write "I don't know." and stop.`;
+
 export const state: AppState = {
 	engine: null,
 	ready: false,
 	chatId: null,
 	chats: {},
 	generating: false,
-	systemPrompt: "",
+	systemPrompt: DEFAULT_SYSTEM_PROMPT,
 	memory: "",
 	modelId: "Qwen2.5-0.5B-Instruct-q4f32_1-MLC",
 	contextSize: 4096,
@@ -82,6 +96,9 @@ export const state: AppState = {
 	voiceEngine: "webspeech",
 	pendingAttachment: null,
 	debug: false,
+	qrngEnabled: false,
+	qrngMode: "buffer",
+	qrngProxyUrl: DEFAULT_QRNG_PROXY_URL,
 };
 
 export async function loadSettings(): Promise<void> {
@@ -93,7 +110,13 @@ export async function loadSettings(): Promise<void> {
 		const cs = await dbGet<{ key: string; value: string }>("settings", "contextSize");
 		if (cs) state.contextSize = Number(cs.value) || 4096;
 		const p = await dbGet<{ key: string; value: string }>("settings", "systemPrompt");
-		if (p) state.systemPrompt = p.value;
+		if (p) {
+			// One-time migration: users who never touched the system prompt
+			// (stored empty string = old default) get upgraded to the new
+			// opinionated default. Anyone with a non-empty stored value keeps
+			// their customisation.
+			state.systemPrompt = p.value.trim() ? p.value : DEFAULT_SYSTEM_PROMPT;
+		}
 		const bg = await dbGet<{ key: string; value: string }>("settings", "bgTheme");
 		if (bg) state.bgTheme = bg.value as AppState["bgTheme"];
 		const tp = await dbGet<{ key: string; value: string }>("settings", "themePreset");
@@ -102,6 +125,14 @@ export async function loadSettings(): Promise<void> {
 		if (ve) state.voiceEngine = ve.value as AppState["voiceEngine"];
 		const d = await dbGet<{ key: string; value: string }>("settings", "debug");
 		if (d) state.debug = d.value === "true";
+		const qe = await dbGet<{ key: string; value: string }>("settings", "qrngEnabled");
+		if (qe) state.qrngEnabled = qe.value === "true";
+		const qm = await dbGet<{ key: string; value: string }>("settings", "qrngMode");
+		if (qm && (qm.value === "buffer" || qm.value === "realtime")) {
+			state.qrngMode = qm.value;
+		}
+		const qu = await dbGet<{ key: string; value: string }>("settings", "qrngProxyUrl");
+		if (qu) state.qrngProxyUrl = qu.value;
 	} catch (_e) {
 		// Settings not found, use defaults
 	}
@@ -116,6 +147,9 @@ export async function saveSettings(): Promise<void> {
 	await dbPut("settings", { key: "themePreset", value: state.themePreset });
 	await dbPut("settings", { key: "voiceEngine", value: state.voiceEngine });
 	await dbPut("settings", { key: "debug", value: String(state.debug) });
+	await dbPut("settings", { key: "qrngEnabled", value: String(state.qrngEnabled) });
+	await dbPut("settings", { key: "qrngMode", value: state.qrngMode });
+	await dbPut("settings", { key: "qrngProxyUrl", value: state.qrngProxyUrl });
 }
 
 export async function loadChats(): Promise<void> {

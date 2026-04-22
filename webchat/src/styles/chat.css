@@ -442,6 +442,52 @@
 	}
 }
 
+/* Error-stub assistant messages (e.g. QRNG stream lost). Visually distinct
+ * so the user knows this is a runtime notice, not the model's answer.
+ * These are excluded from LLM context in buildContext(). */
+.message.msg-error .msg-content {
+	color: var(--danger, #ef4444);
+	font-style: italic;
+	opacity: 0.85;
+	border-left: 2px solid var(--danger, #ef4444);
+	padding-left: 10px;
+}
+
+/* --- Speak (read aloud) button on the latest assistant message --- */
+.msg-speak-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border: 1px solid transparent;
+	background: none;
+	color: var(--text-tertiary);
+	cursor: pointer;
+	border-radius: 50%;
+	padding: 0;
+	opacity: 0.75;
+	transition: opacity var(--transition), color var(--transition), background var(--transition), border-color var(--transition);
+}
+.msg-speak-btn:hover {
+	color: var(--text);
+	background: var(--surface-hover);
+	opacity: 1;
+}
+/* ON state: unmistakable - filled background, accent color, subtle halo.
+ * No scale animation (that was the "wobbly" effect). */
+.msg-speak-btn.reading {
+	color: #fff;
+	background: var(--accent);
+	border-color: var(--accent);
+	opacity: 1;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+}
+.msg-speak-btn.reading:hover {
+	background: var(--accent);
+	filter: brightness(1.1);
+}
+
 /* --- Typing indicator --- */
 .typing-indicator {
 	display: flex;

@@ -11,6 +11,17 @@
 	pointer-events: none;
 }
 
+/* Reserve space at the bottom of the chat area while the debug pane is
+ * visible so the input row and status strip aren't covered. The two values
+ * below match the collapsed (36px) and expanded (min(50vh, 360px)) heights
+ * of #debug-pane. */
+body.debug-on #main {
+	padding-bottom: 36px;
+}
+body.debug-on:has(#debug-pane.expanded) #main {
+	padding-bottom: min(50vh, 360px);
+}
+
 @media (max-width: 768px) {
 	#debug-container {
 		left: 0;

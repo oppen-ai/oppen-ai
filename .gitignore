@@ -11,6 +11,10 @@ webchat/infra/artifacts/
 website/node_modules/
 website/infra/artifacts/
 
+# Wrangler / Cloudflare state (contains CF account id + email cache)
+qrng-proxy/.wrangler/
+qrng-proxy/node_modules/
+
 # Test output
 webchat/test-results/
 

@@ -37,6 +37,27 @@ echo "Creating artifact: $TIMESTAMP"
 mkdir -p "$ARTIFACT_DIR"
 cp -r "$APP_DIR/dist/"* "$ARTIFACT_DIR/"
 
+# Cache-bust the service worker. Vite already gives JS/CSS hashed filenames
+# (immutable URLs) but the SW's APP_CACHE key is hardcoded `oppen-app-v1`,
+# so a deploy would otherwise re-hand the user the OLD cached bundle on
+# their next visit. Bumping APP_CACHE forces the SW activate handler to
+# evict old caches and refetch the new index.html / hashed assets.
+# MODEL_CACHE is intentionally NOT bumped - we want HuggingFace model
+# downloads cached across builds.
+SW_FILE="$ARTIFACT_DIR/sw.js"
+if [ -f "$SW_FILE" ]; then
+    APP_CACHE_NEW="oppen-app-${TIMESTAMP}"
+    sed -i.bak "s|oppen-app-v1|${APP_CACHE_NEW}|g" "$SW_FILE"
+    rm -f "${SW_FILE}.bak"
+    if grep -q "${APP_CACHE_NEW}" "$SW_FILE"; then
+        echo "  SW cache key bumped: oppen-app-v1 -> ${APP_CACHE_NEW}"
+    else
+        echo "  WARN: SW cache key was not bumped - check sw.js for 'oppen-app-v1'"
+    fi
+else
+    echo "  WARN: sw.js not found in artifact - cache-bust skipped"
+fi
+
 # Print summary
 echo ""
 echo "=== Build Complete ==="

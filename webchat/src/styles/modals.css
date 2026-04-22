@@ -1,7 +1,9 @@
 .modal-overlay {
 	position: fixed;
 	inset: 0;
-	z-index: 150;
+	/* Above #debug-container (z-index 300) and the loading overlay (200) so
+	 * the debug pane never sits on top of an open modal. */
+	z-index: 400;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -237,4 +239,89 @@
 .toast.visible {
 	opacity: 1;
 	transform: translateX(-50%) translateY(0);
+}
+
+/* --- Compact modal (memory) --- */
+.modal-compact {
+	max-height: min(92vh, 680px);
+	overflow-y: auto;
+	padding-top: 24px;
+	position: relative;
+}
+.modal-close {
+	position: absolute;
+	top: 10px;
+	right: 12px;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: 22px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+}
+.modal-close:hover {
+	background: var(--border);
+	color: var(--text-primary);
+}
+.label-hint {
+	font-weight: 400;
+	color: var(--text-muted);
+	font-size: 11px;
+	margin-left: 6px;
+}
+.form-row {
+	display: flex;
+	gap: 10px;
+	align-items: flex-end;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+.form-row-inline {
+	align-items: center;
+	padding: 6px 0;
+}
+.form-group-inline {
+	flex: 1 1 0;
+	min-width: 140px;
+	margin-bottom: 0;
+}
+.toggle-inline {
+	flex: 0 0 auto;
+	margin-right: 8px;
+}
+
+/* --- Experimental section (collapsible) --- */
+.form-section {
+	margin-top: 18px;
+	border-top: 1px solid var(--border);
+	padding-top: 14px;
+}
+.form-section > summary {
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--text-muted);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	margin-bottom: 12px;
+	user-select: none;
+	list-style: none;
+}
+.form-section > summary::-webkit-details-marker { display: none; }
+.form-section > summary::before {
+	content: "\25B8";
+	display: inline-block;
+	width: 14px;
+	transition: transform 0.15s;
+}
+.form-section[open] > summary::before { transform: rotate(90deg); }
+#qrng-status-line {
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+	font-size: 11px;
+	word-break: break-all;
 }

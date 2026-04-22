@@ -1,5 +1,6 @@
 import { deleteChatById, switchChat } from "../chat";
 import { sanitize, sanitizeMarkdown } from "../security";
+import { isEnabled as speechIsEnabled } from "../speech";
 import { currentChat, state } from "../state";
 
 import { showToast } from "./toast";
@@ -12,6 +13,9 @@ const SVG_X =
 
 const SVG_SEND =
 	'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="14" y2="3"/><polyline points="14 10 14 3 7 3"/></svg>';
+
+export const SVG_STOP =
+	'<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
 const SVG_MENU =
 	'<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/></svg>';
@@ -36,6 +40,9 @@ const SVG_MIC =
 
 const SVG_TRASH =
 	'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+
+const SVG_SPEAKER =
+	'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
 
 export function buildAppShell(): void {
 	const app = document.getElementById("app");
@@ -64,7 +71,6 @@ export function buildAppShell(): void {
 			<header class="topbar">
 				<button class="btn btn-icon" id="menu-toggle">${SVG_MENU}</button>
 				<span class="topbar-title" id="topbar-title">New Chat</span>
-				<div id="memory-indicator" style="display:none"></div>
 				<div class="model-badge" id="model-badge">
 					<span class="dot" id="status-dot"></span>
 					<span class="model-badge-label" id="model-badge-label">loading...</span>
@@ -84,13 +90,43 @@ export function buildAppShell(): void {
 						<button class="btn-icon-sm" id="upload-doc-btn" title="Upload document">${SVG_DOC}</button>
 						<button class="btn-icon-sm" id="voice-btn" title="Voice input">${SVG_MIC}</button>
 						<button class="btn-icon-sm" id="clear-chat-btn" title="Clear chat">${SVG_TRASH}</button>
+						<button type="button" class="btn-icon-sm mode-indicator gpu" id="gpu-indicator" title="GPU status" aria-label="GPU status">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="12" rx="2"/><rect x="6" y="10" width="6" height="6" rx="1"/><line x1="16" y1="11" x2="19" y2="11"/><line x1="16" y1="14" x2="19" y2="14"/><line x1="7" y1="4" x2="7" y2="7"/><line x1="11" y1="4" x2="11" y2="7"/><line x1="15" y1="4" x2="15" y2="7"/></svg>
+							<span class="mode-popover" role="tooltip" hidden id="gpu-popover">GPU accelerator in use. The chat runs entirely on your device via WebGPU - no servers see your messages.</span>
+						</button>
+						<button type="button" class="btn-icon-sm mode-indicator inactive" id="memory-indicator" title="Memory" aria-label="Memory">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5a2.5 2.5 0 0 0-2.5 2.5v.08A2.5 2.5 0 0 0 4.5 7.5c0 .3.05.58.14.84A2.5 2.5 0 0 0 3 10.5a2.5 2.5 0 0 0 1.5 2.29A2.5 2.5 0 0 0 5 15.5a2.5 2.5 0 0 0 2 2.45V19a2.5 2.5 0 0 0 5 0V5a2.5 2.5 0 0 0-2.5-2.5Z"/><path d="M14.5 2.5a2.5 2.5 0 0 1 2.5 2.5v.08A2.5 2.5 0 0 1 19.5 7.5c0 .3-.05.58-.14.84A2.5 2.5 0 0 1 21 10.5a2.5 2.5 0 0 1-1.5 2.29A2.5 2.5 0 0 1 19 15.5a2.5 2.5 0 0 1-2 2.45V19a2.5 2.5 0 0 1-5 0V5a2.5 2.5 0 0 1 2.5-2.5Z"/></svg>
+							<span class="mode-popover" role="tooltip" hidden>
+								<span class="popover-text" id="memory-popover-text">No encrypted memory loaded. Memory adds extra context the LLM sees on every prompt.</span>
+								<span class="popover-actions">
+									<label class="toggle-label toggle-inline">
+										<span id="memory-toggle-label">Disabled</span>
+										<input type="checkbox" id="memory-popover-toggle" class="toggle-input">
+										<span class="toggle-switch"></span>
+									</label>
+								</span>
+							</span>
+						</button>
+						<button type="button" class="btn-icon-sm mode-indicator qrng inactive" id="qrng-indicator" title="Quantum randomness" aria-label="Quantum randomness">
+							<svg class="qrng-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round"><circle cx="12" cy="12" r="1.8" fill="currentColor"/><ellipse cx="12" cy="12" rx="10" ry="4"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-60 12 12)"/></svg>
+							<span class="electron-dot" aria-hidden="true"></span>
+							<span class="mode-popover" role="tooltip" hidden>
+								<span class="popover-text" id="qrng-popover-text">QRNG - real-time quantum field entropy. Requires internet connection.</span>
+								<span class="popover-actions">
+									<label class="toggle-label toggle-inline">
+										<span id="qrng-toggle-label">Enabled</span>
+										<input type="checkbox" id="qrng-popover-toggle" class="toggle-input">
+										<span class="toggle-switch"></span>
+									</label>
+								</span>
+							</span>
+						</button>
 						<span class="input-actions-spacer"></span>
 						<button id="send-btn" disabled>${SVG_SEND}</button>
 					</div>
 				</div>
 				<input type="file" id="image-input" accept="image/*" style="display:none">
 				<input type="file" id="doc-input" accept=".pdf,.txt,.md,.csv,.json" style="display:none">
-				<div class="input-hint">Runs entirely on your device · <span id="webgpu-hint"></span></div>
 			</div>
 		</main>
 		<div id="loading-overlay">
@@ -149,6 +185,32 @@ export function buildAppShell(): void {
 					</label>
 					<div class="form-hint">Shows a log panel with console output, network requests, and errors. Useful for troubleshooting.</div>
 				</div>
+				<details class="form-section" id="experimental-section">
+					<summary>Experimental features</summary>
+					<div class="form-group">
+						<label class="toggle-label">
+							<span>Quantum randomness (per token)</span>
+							<input type="checkbox" id="qrng-enabled" class="toggle-input">
+							<span class="toggle-switch"></span>
+						</label>
+						<div class="form-hint">Reseeds the sampler with quantum-derived bytes (ANU, via the oppen-qrng-proxy Cloudflare Worker) before <em>every</em> token sample. Off by default. If the per-token sampler patch cannot be installed for the loaded WebLLM version, chat will refuse to generate - there is no per-response or PRNG fallback. In buffer mode, if the pool runs dry for an individual token the sampler continues with TVM's existing RNG state for that one token and refills in the background.</div>
+					</div>
+					<div class="form-group">
+						<label>QRNG mode</label>
+						<select class="input-field select-field" id="qrng-mode">
+							<option value="buffer">Pre-buffer (smooth, refills in background)</option>
+							<option value="realtime">Realtime stream (fresh quantum bytes per response, adds latency)</option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label>QRNG proxy URL</label>
+						<input type="text" class="input-field" id="qrng-proxy-url" placeholder="https://qrng.oppen.ai">
+						<div class="form-hint">Cloudflare Worker that fronts ANU QRNG with CORS. See <code>qrng-proxy/</code> in the repo to deploy your own.</div>
+					</div>
+					<div class="form-group">
+						<div class="form-hint" id="qrng-status-line">Status: idle</div>
+					</div>
+				</details>
 				<div class="modal-actions">
 					<button class="btn" id="settings-cancel">Cancel</button>
 					<button class="btn btn-primary" id="settings-save">Save & Reload Model</button>
@@ -156,21 +218,45 @@ export function buildAppShell(): void {
 			</div>
 		</div>
 		<div class="modal-overlay" id="memory-modal">
-			<div class="modal">
+			<div class="modal modal-compact">
+				<button type="button" class="modal-close" id="memory-modal-close" aria-label="Close">&times;</button>
 				<h3>Encrypted Memory</h3>
-				<p class="modal-desc">Create or load encrypted context via URL hash. Data never reaches the server.</p>
+				<p class="modal-desc">Encrypted context shared via URL hash. Data never reaches the server.</p>
 				<div class="memory-tabs">
 					<button class="btn btn-primary" id="tab-create">Create</button>
-					<button class="btn" id="tab-load">Load from URL</button>
+					<button class="btn" id="tab-load">Load</button>
+					<button class="btn" id="tab-view">View current</button>
 				</div>
 				<div id="memory-create-tab">
 					<div class="form-group">
-						<label>Memory Content</label>
-						<textarea class="input-field" id="memory-text" rows="4" placeholder="Preferences, context, instructions..."></textarea>
+						<label>Memory content <span class="label-hint">max 32 KB</span></label>
+						<textarea class="input-field" id="memory-text" rows="3" placeholder="Preferences, context, instructions..." maxlength="32768"></textarea>
 					</div>
-					<div class="form-group">
-						<label>Password</label>
-						<input type="password" class="input-field" id="memory-password-create" placeholder="Encryption password">
+					<div class="form-row">
+						<div class="form-group form-group-inline">
+							<label>Model</label>
+							<select class="input-field select-field" id="memory-model-select">
+								<option value="">Keep recipient's</option>
+							</select>
+						</div>
+						<div class="form-group form-group-inline">
+							<label>Password</label>
+							<input type="password" class="input-field" id="memory-password-create" placeholder="Encryption password">
+						</div>
+					</div>
+					<div class="form-row form-row-inline">
+						<label class="toggle-label toggle-inline">
+							<span>Enable QRNG for recipient</span>
+							<input type="checkbox" id="memory-qrng-enable" class="toggle-input">
+							<span class="toggle-switch"></span>
+						</label>
+						<div class="form-group form-group-inline" id="memory-qrng-config" style="display:none">
+							<label>Mode</label>
+							<select class="input-field select-field" id="memory-qrng-mode">
+								<option value="buffer">Pre-buffer</option>
+								<option value="realtime">Realtime</option>
+							</select>
+						</div>
 					</div>
 					<div class="modal-actions">
 						<button class="btn" id="memory-create-cancel">Cancel</button>
@@ -181,10 +267,38 @@ export function buildAppShell(): void {
 						<button class="btn btn-full" id="memory-copy-url" style="margin-top:8px">Copy URL</button>
 					</div>
 				</div>
+				<div id="memory-view-tab" style="display:none">
+					<div class="form-group">
+						<label>Active memory text <span class="label-hint">editable - re-encrypt below to share updated</span></label>
+						<textarea class="input-field" id="memory-view-text" rows="4" maxlength="32768"></textarea>
+					</div>
+					<div class="form-row">
+						<div class="form-group form-group-inline">
+							<label>Model</label>
+							<div class="form-hint" id="memory-view-model">(none)</div>
+						</div>
+						<div class="form-group form-group-inline">
+							<label>QRNG</label>
+							<div class="form-hint" id="memory-view-qrng">(none)</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>Password (re-enter to re-encrypt)</label>
+						<input type="password" class="input-field" id="memory-view-password" placeholder="Encryption password">
+					</div>
+					<div class="modal-actions">
+						<button class="btn" id="memory-view-close">Close</button>
+						<button class="btn btn-primary" id="memory-view-update">Update & copy URL</button>
+					</div>
+					<div id="memory-view-result" style="display:none">
+						<div class="memory-url-display" id="memory-view-url-display"></div>
+						<button class="btn btn-full" id="memory-view-copy-url" style="margin-top:8px">Copy URL</button>
+					</div>
+				</div>
 				<div id="memory-load-tab" style="display:none">
 					<div class="form-group">
 						<label>Encrypted URL or Hash</label>
-						<input type="text" class="input-field" id="memory-url-input" placeholder="#/memory/...">
+						<input type="text" class="input-field" id="memory-url-input" placeholder="#/memory/..." maxlength="65536">
 					</div>
 					<div class="form-group">
 						<label>Password</label>
@@ -315,11 +429,19 @@ export function renderMessages(): void {
 				</div>
 			</div>`;
 			}
-			return `<div class="message ${sanitize(m.role)}" data-msg-idx="${idx}">
+			const isLast = idx === chat.messages.length - 1;
+			const speechOn = speechIsEnabled();
+			// No speaker on error stubs - they're not real replies.
+			const speakBtn = isLast && !m.isError
+				? `<button class="msg-speak-btn${speechOn ? " reading" : ""}" title="${speechOn ? "Stop reading aloud" : "Read aloud (stays on for new replies)"}" data-msg-idx="${idx}" data-chat-id="${sanitize(chat.id)}" aria-pressed="${speechOn}">${SVG_SPEAKER}</button>`
+				: "";
+			const errClass = m.isError ? " msg-error" : "";
+			return `<div class="message ${sanitize(m.role)}${errClass}" data-msg-idx="${idx}">
 				<div class="msg-body">
 					<div class="msg-content">${sanitizeMarkdown(m.content)}</div>
 					<div class="msg-meta">
 						<span class="msg-time">${sanitize(time)}</span>
+						${speakBtn}
 						<button class="msg-copy-btn" title="Copy">${SVG_COPY}</button>
 					</div>
 				</div>
@@ -355,7 +477,7 @@ export function initChipEvents(): void {
 	const el = document.getElementById("messages-inner");
 	if (!el) return;
 
-	el.addEventListener("click", (e) => {
+	el.addEventListener("click", async (e) => {
 		const chip = (e.target as HTMLElement).closest(".empty-chip") as HTMLElement | null;
 		if (chip?.dataset.prompt) {
 			const input = document.getElementById("chat-input") as HTMLTextAreaElement | null;
@@ -364,31 +486,50 @@ export function initChipEvents(): void {
 				input.style.height = "auto";
 				input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
 				input.focus();
+				// Assigning to .value doesn't fire the "input" event that
+				// refreshSendButton() listens for, so the send button stays
+				// disabled. Dispatch one, and also refresh directly as a
+				// belt-and-suspenders safeguard.
+				input.dispatchEvent(new Event("input", { bubbles: true }));
+				const { refreshSendButton } = await import("./input");
+				refreshSendButton();
 			}
 		}
 	});
 }
 
-/** Event delegation for copy buttons on assistant messages */
+/** Event delegation for copy and speak buttons on assistant messages */
 export function initCopyEvents(): void {
 	const el = document.getElementById("messages-inner");
 	if (!el) return;
 
-	el.addEventListener("click", (e) => {
-		const btn = (e.target as HTMLElement).closest(".msg-copy-btn") as HTMLElement | null;
-		if (!btn) return;
+	el.addEventListener("click", async (e) => {
+		const target = e.target as HTMLElement;
 
-		const msgEl = btn.closest(".message") as HTMLElement | null;
-		const idx = msgEl?.dataset.msgIdx;
-		if (idx == null) return;
+		const copyBtn = target.closest(".msg-copy-btn") as HTMLElement | null;
+		if (copyBtn) {
+			const msgEl = copyBtn.closest(".message") as HTMLElement | null;
+			const idx = msgEl?.dataset.msgIdx;
+			if (idx == null) return;
+			const chat = currentChat();
+			const msg = chat?.messages[Number(idx)];
+			if (!msg) return;
+			navigator.clipboard.writeText(msg.content).then(() => showToast("Copied to clipboard"));
+			return;
+		}
 
-		const chat = currentChat();
-		if (!chat) return;
-
-		const msg = chat.messages[Number(idx)];
-		if (!msg) return;
-
-		navigator.clipboard.writeText(msg.content).then(() => showToast("Copied to clipboard"));
+		const speakBtn = target.closest(".msg-speak-btn") as HTMLElement | null;
+		if (speakBtn) {
+			const { toggleEnabled, readLastIfAny, isEnabled } = await import("../speech");
+			const nowOn = toggleEnabled();
+			// When turning on, start with whatever assistant message is
+			// already present (if any) so the user hears immediate feedback.
+			if (nowOn && isEnabled()) {
+				const chat = currentChat();
+				if (chat) readLastIfAny(chat.id, chat.messages);
+			}
+			return;
+		}
 	});
 }
 

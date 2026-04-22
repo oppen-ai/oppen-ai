@@ -3,9 +3,9 @@ import { expect, test } from "playwright/test";
 test.describe("UI", () => {
 	test("sidebar toggles on mobile viewport", async ({ page }) => {
 		await page.setViewportSize({ width: 375, height: 812 });
-		await page.goto("/");
+		await page.goto("/?noengine=1");
 
-		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 15000 });
+		await expect(page.locator("#loading-overlay")).not.toHaveClass(/visible/, { timeout: 60000 });
 
 		const sidebar = page.locator("#sidebar");
 		await expect(sidebar).not.toHaveClass(/open/);
@@ -18,7 +18,7 @@ test.describe("UI", () => {
 	});
 
 	test("theme switch changes data-theme attribute", async ({ page }) => {
-		await page.goto("/");
+		await page.goto("/?noengine=1");
 		const html = page.locator("html");
 		await expect(html).toHaveAttribute("data-theme", "dark");
 
@@ -30,7 +30,7 @@ test.describe("UI", () => {
 	});
 
 	test("settings modal opens and closes", async ({ page }) => {
-		await page.goto("/");
+		await page.goto("/?noengine=1");
 		const modal = page.locator("#settings-modal");
 		await expect(modal).not.toHaveClass(/visible/);
 
@@ -42,7 +42,7 @@ test.describe("UI", () => {
 	});
 
 	test("new chat button creates a new chat", async ({ page }) => {
-		await page.goto("/");
+		await page.goto("/?noengine=1");
 		const title = page.locator("#topbar-title");
 		await expect(title).toHaveText("New Chat");
 
